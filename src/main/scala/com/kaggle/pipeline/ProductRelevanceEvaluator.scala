@@ -2,7 +2,7 @@ package com.kaggle.pipeline
 
 import com.kaggle.SubmitCsvCreator
 import com.kaggle.feature.extraction.SimpleFeatureExtractor
-import com.kaggle.ml.LinearRegression
+import com.kaggle.ml.MachineLearning
 import com.kaggle.model.{TrainItem, TestItem, Id, Evaluation}
 
 /**
@@ -11,9 +11,9 @@ import com.kaggle.model.{TrainItem, TestItem, Id, Evaluation}
   */
 
 //TODO: Change Map[Id, Item] to List[(Id, Item)] because there might be duplicate keys
-class ProductRelevanceEvaluator(trainData: Map[Id, TrainItem], testData: Map[Id, TestItem]) {
+class ProductRelevanceEvaluator(trainData: Map[Id, TrainItem], testData: Map[Id, TestItem]) extends Serializable {
   val featureExtractor = SimpleFeatureExtractor
-  val linearRegression = new LinearRegression
+  val machineLearning = new MachineLearning
 
   def evaluate(): List[Evaluation] = {
     val trainingFeatures = trainData.toList map { case (id, item) => (featureExtractor.extract(item.data), item.relevance) }
@@ -21,7 +21,7 @@ class ProductRelevanceEvaluator(trainData: Map[Id, TrainItem], testData: Map[Id,
     // TODO: How scala knows there aren't same ids
     val testFeatures = testData.toList map { case (id, item) => (id, featureExtractor.extract(item)) }
 
-    linearRegression.train(trainingFeatures)
-    linearRegression.evaluate(testFeatures)
+    machineLearning.train(trainingFeatures)
+    machineLearning.evaluate(testFeatures)
   }
 }
