@@ -22,6 +22,8 @@ object Pipeline extends App with Serializable {
     case Seq("--outputPath", path) => Paths.get(path)
   } getOrElse { throw new Exception("No output path specified") }
 
+  System.setProperty("spark.executor.memory", "4g")
+
   // 1. Read data
   val trainData = SparkFileReader.readTrainData("/train.csv")
   val testData = SparkFileReader.readTestData("/test.csv")
