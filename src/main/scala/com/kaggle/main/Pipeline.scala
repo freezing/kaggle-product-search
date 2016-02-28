@@ -22,7 +22,9 @@ object Pipeline extends App with Serializable {
     case Seq("--outputPath", path) => Paths.get(path)
   } getOrElse { throw new Exception("No output path specified") }
 
-  System.setProperty("spark.executor.memory", "4g")
+  System.setProperty("spark.executor.memory", "3g")
+
+//  System.setProperty("")
 
   // 1. Read data
   val trainData = SparkFileReader.readTrainData("/train.csv")
@@ -33,13 +35,17 @@ object Pipeline extends App with Serializable {
   val cleanTestData = DataCleaner.processTestData(testData)
 
   // 3. Extract Features
-  val trainDataFeatures = SimpleFeatureExtractor.processTrainData(cleanTrainData)
+  val trainDataFeatures = SimpleFeatureExtractor.processTrainData(cleanTrainData).cache()
   val testDataFeatures = SimpleFeatureExtractor.processTestData(cleanTestData)
 
-  // 4. Machine Learning
-  val evaluations = MachineLearning.trainAndPredict(trainDataFeatures, testDataFeatures)
+//  // 4. Machine Learning
+  val scalerModel = MachineLearning.scale(trainDataFeatures)
+  MachineLearning.train(trainDataFeatures, scalerModel)
+//  val evaluations = MachineLearning.trainAndPredict(trainDataFeatures, testDataFeatures)
+//  evaluations.saveAsTextFile("/home/freezing/Desktop/tmp")
 
-  // 5. Save results
-  // TODO: Use Spark for this
-  new SubmitCsvCreator(evaluations.toLocalIterator.toList).save(outputPath)
+
+  //  // 5. Save results
+//  // TODO: Use Spark for this
+//  new SubmitCsvCreator(evaluations.toLocalIterator.toList).save(outputPath)
 }

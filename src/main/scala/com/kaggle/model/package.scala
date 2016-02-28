@@ -24,6 +24,8 @@ package object model {
     val productId: ProductId
     val title: RawTitle
     val searchTerm: RawSearchTerm
+
+    override def toString = s"RawData($id, $productId, $title, $searchTerm)"
   }
 
   case class TestItem(id: Id, productId: ProductId, title: RawTitle, searchTerm: RawSearchTerm) extends RawData

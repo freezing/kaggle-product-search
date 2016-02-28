@@ -15,6 +15,7 @@ package object service {
     def readTextFile(file: String): RDD[String] = {
       val path = getClass.getResource(file).getFile
       sc.textFile(path.toString)
+//      sc.parallelize(CsvReader.readFile(file)).cache
     }
 
     def readTrainData(file: String): RDD[TrainItem] = readTextFile(file) map { line => CsvParser.parseTrainData(line) }
