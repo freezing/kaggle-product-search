@@ -5,7 +5,8 @@ package com.kaggle.nlp
   * Stem and normalize the tokens.
   */
 class DataStemmer {
-  def process(token: Token): StemmedToken = ???
+  // TODO: Not implemented
+  def process(token: Token): StemmedToken = StemmedToken(token.value, token.value.toLowerCase)
 
   def process(tokens: List[Token]): List[StemmedToken] = tokens map process
 }

@@ -10,7 +10,8 @@ package com.kaggle.nlp
   * - lightbulb -> light bulb; space error - in this case it is split in two tokens (order MUST be preserved)
   */
 class DataSpellChecker {
-  def process(token: Token): SpellCorrectedToken = ???
+  // TODO: Not implemented
+  def process(token: Token): SpellCorrectedToken = token
 
   def process(tokens: List[Token]): List[SpellCorrectedToken] = tokens map process
 }
