@@ -20,7 +20,9 @@ class MachineLearning {
   }
 
   def predict(model: LinearRegressionModel, data: RDD[TestFeature]): RDD[Evaluation] = {
-    ???
+    val vectors = data map { tf => toVector(tf.feature) }
+    val predictions = model predict vectors
+    predictions zip data map { case (prediction, testFeature) => Evaluation(testFeature.id, Relevance(prediction)) }
   }
 
   def trainAndPredict(trainData: RDD[TrainFeature], testData: RDD[TestFeature]): RDD[Evaluation] = {
