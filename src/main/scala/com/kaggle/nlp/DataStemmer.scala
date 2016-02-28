@@ -4,7 +4,7 @@ package com.kaggle.nlp
   * Created by freezing on 28/02/16.
   * Stem and normalize the tokens.
   */
-class DataStemmer {
+class DataStemmer extends Serializable {
   // TODO: Not implemented
   def process(token: Token): StemmedToken = StemmedToken(token.value, token.value.toLowerCase)
 

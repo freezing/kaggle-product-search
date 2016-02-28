@@ -9,7 +9,7 @@ package com.kaggle.nlp
   * - sponge -> spounge; missing letter
   * - lightbulb -> light bulb; space error - in this case it is split in two tokens (order MUST be preserved)
   */
-class DataSpellChecker {
+class DataSpellChecker extends Serializable {
   // TODO: Not implemented
   def process(token: Token): SpellCorrectedToken = token
 

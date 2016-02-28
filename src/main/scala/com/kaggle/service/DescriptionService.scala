@@ -5,7 +5,7 @@ import com.kaggle.model.{Description, ProductId}
 /**
   * Created by freezing on 2/25/16.
   */
-class DescriptionService {
+class DescriptionService extends Serializable {
   private lazy val descriptionMap: Map[ProductId, Description] = {
     val lines = CsvReader.readFile("/product_descriptions.csv")
     (lines map { line =>

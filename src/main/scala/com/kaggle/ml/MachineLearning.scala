@@ -11,7 +11,7 @@ import org.apache.spark.mllib.linalg._
 /**
   * Created by freezing on 2/26/16.
   */
-class MachineLearning {
+class MachineLearning extends Serializable {
   def train(data: RDD[TrainFeature]): LinearRegressionModel = {
     val labeledData = data map { trainFeature =>
       LabeledPoint(trainFeature.relevance.value, toVector(trainFeature.feature))

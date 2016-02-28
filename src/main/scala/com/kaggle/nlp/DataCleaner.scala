@@ -12,7 +12,7 @@ import org.apache.spark.rdd.RDD
   * 5. DataSemanticExtraction - extract semantics for each token such as: color, product type, brand, material, ...
   */
 class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpellChecker, dataStemmer: DataStemmer,
-                  dataTokenClassification: DataTokenClassification, dataSemanticExtraction: DataSemanticExtraction) {
+                  dataTokenClassification: DataTokenClassification, dataSemanticExtraction: DataSemanticExtraction) extends Serializable {
   def process(data: String): List[CleanToken] = {
     dataLexer.tokenize(data) map
       dataSpellChecker.process map

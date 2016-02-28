@@ -9,7 +9,7 @@ import org.apache.spark.rdd.RDD
 /**
   * Created by freezing on 2/25/16.
   */
-class SimpleFeatureExtractor(implicit val attributeService: AttributeService, descriptionService: DescriptionService) {
+class SimpleFeatureExtractor(implicit val attributeService: AttributeService, descriptionService: DescriptionService) extends Serializable {
   def extract(item: RawData, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Feature = {
     val titleWords = item.title.split(" ")
     val words = item.searchTerm.value.split(" ")
