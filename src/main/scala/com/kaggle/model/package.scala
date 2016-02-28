@@ -1,5 +1,7 @@
 package com.kaggle
 
+import com.kaggle.nlp.CleanToken
+
 /**
   * Created by freezing on 2/25/16.
   */
@@ -25,7 +27,11 @@ package object model {
   }
 
   case class TestItem(id: Id, productId: ProductId, title: RawTitle, searchTerm: RawSearchTerm) extends RawData
+  case class CleanTestItem(original: TestItem, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken])
+
   case class TrainItem(rawData: RawData, relevance: Relevance)
+  case class CleanTrainItem(original: TrainItem, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken])
+
   case class Evaluation(id: Id, relevance: Relevance)
 
   case class Token(original: String, normalized: String)

@@ -1,5 +1,8 @@
 package com.kaggle.nlp
 
+import com.kaggle.model.{TestItem, CleanTestItem, CleanTrainItem, TrainItem}
+import org.apache.spark.rdd.RDD
+
 /**
   * Created by freezing on 28/02/16.
   * 1. DataLexer - split data in the list of tokens
@@ -17,4 +20,22 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
       dataTokenClassification.process map
       dataSemanticExtraction.process
   }
+
+  def processTestData(data: RDD[TestItem]): RDD[CleanTestItem] = {
+    data map { item =>
+      val cleanTitle = process(item.title)
+      val cleanSearchTerm = process(item.searchTerm.value)
+      CleanTestItem(item, cleanTitle, cleanSearchTerm)
+    }
+  }
+
+  def processTrainData(data: RDD[TrainItem]): RDD[CleanTrainItem] = {
+    data map { item =>
+      val cleanTitle = process(item.rawData.title)
+      val cleanSearchTerm = process(item.rawData.searchTerm.value)
+      CleanTrainItem(item, cleanTitle, cleanSearchTerm)
+    }
+  }
 }
+
+object DataCleaner extends DataCleaner

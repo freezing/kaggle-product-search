@@ -20,4 +20,11 @@ package object nlp {
   type OriginalValue = String
   type StemmedValue = String
   type SpellCorrectedToken = Token
+
+  // Create DataCleaner
+  implicit val lexer = new DataLexer
+  implicit val spellChecker = new DataSpellChecker
+  implicit val stemmer = new DataStemmer
+  implicit val tokenClassification = new DataTokenClassification
+  implicit val semanticExtraction = new DataSemanticExtraction
 }

@@ -1,6 +1,7 @@
 package com.kaggle
 
-import org.apache.spark.SparkContext
+import com.kaggle.model.{TestItem, TrainItem}
+import com.kaggle.parser.CsvParser
 import org.apache.spark.rdd.RDD
 
 /**
@@ -15,5 +16,12 @@ package object service {
       val path = getClass.getResource(file).getFile
       sc.textFile(path.toString)
     }
+
+    def readTrainData(file: String): RDD[TrainItem] = readTextFile(file) map { line => CsvParser.parseTrainData(line) }
+    def readTestData(file: String): RDD[TestItem] = readTextFile(file) map { line => CsvParser.parseTestData(line) }
   }
+
+  // Initialize implicit services
+  implicit val attributesService = new AttributeService
+  implicit val descriptionService = new DescriptionService
 }
