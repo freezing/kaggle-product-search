@@ -25,4 +25,6 @@ package object model {
   case class TestItem(id: Id, product: Product, searchTerm: SearchTerm) extends Data
   case class TrainItem(data: Data, relevance: Relevance)
   case class Evaluation(id: Id, relevance: Relevance)
+
+  case class Token(original: String, normalized: String)
 }
