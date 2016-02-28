@@ -20,7 +20,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
 
     val attrs = attributeService.get(item.productId)
     val attrCnt = attrs count { attr => (words collect { case w if attr.value.toLowerCase().contains(w.toLowerCase()) => w }).length > 0 }
-    Feature(List(cnt, /*jaccard, queryMatch, attrCnt,*/ 1))
+    Feature(List(cnt/*jaccard, queryMatch, attrCnt,*/))
   }
 
   def processTrainData(data: RDD[CleanTrainItem]): RDD[TrainFeature] = {

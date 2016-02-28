@@ -24,8 +24,6 @@ object Pipeline extends App with Serializable {
 
   System.setProperty("spark.executor.memory", "3g")
 
-//  System.setProperty("")
-
   // 1. Read data
   val trainData = SparkFileReader.readTrainData("/train.csv")
   val testData = SparkFileReader.readTestData("/test.csv")
@@ -41,11 +39,9 @@ object Pipeline extends App with Serializable {
 //  // 4. Machine Learning
   val scalerModel = MachineLearning.scale(trainDataFeatures)
   MachineLearning.train(trainDataFeatures, scalerModel)
-//  val evaluations = MachineLearning.trainAndPredict(trainDataFeatures, testDataFeatures)
-//  evaluations.saveAsTextFile("/home/freezing/Desktop/tmp")
-
+  val evaluations = MachineLearning.trainAndPredict(trainDataFeatures, testDataFeatures, scalerModel)
 
   //  // 5. Save results
 //  // TODO: Use Spark for this
-//  new SubmitCsvCreator(evaluations.toLocalIterator.toList).save(outputPath)
+  new SubmitCsvCreator(evaluations.toLocalIterator.toList).save(outputPath)
 }
