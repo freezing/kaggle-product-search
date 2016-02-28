@@ -4,7 +4,7 @@ package com.kaggle
   * Created by freezing on 2/25/16.
   */
 package object model {
-  type Title = String
+  type RawTitle = String
   type Description = String
   type AttributeName = String
   type AttributeValue = String
@@ -12,17 +12,19 @@ package object model {
   case class Id(value: String) extends AnyVal
   case class ProductId(value: String) extends AnyVal
   case class Relevance(value: Double) extends AnyVal
-  case class SearchTerm(value: String) extends AnyVal
 
-  case class Attribute(name: AttributeName, value: AttributeValue)
-  case class Product(id: ProductId, title: Title)
+  case class RawSearchTerm(value: String) extends AnyVal
+  case class RawAttribute(productId: ProductId, name: AttributeName, value: AttributeValue)
+  case class RawDescription(productId: ProductId, value: Description)
 
-  trait Data {
+  trait RawData {
     val id: Id
-    val product: Product
-    val searchTerm: SearchTerm
+    val productId: ProductId
+    val title: RawTitle
+    val searchTerm: RawSearchTerm
   }
-  case class TestItem(id: Id, product: Product, searchTerm: SearchTerm) extends Data
-  case class TrainItem(data: Data, relevance: Relevance)
+
+  case class TestItem(id: Id, productId: ProductId, title: RawTitle, searchTerm: RawSearchTerm) extends RawData
+  case class TrainItem(rawData: RawData, relevance: Relevance)
   case class Evaluation(id: Id, relevance: Relevance)
 }

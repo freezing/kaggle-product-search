@@ -1,15 +1,18 @@
 package com.kaggle.service
 
+import com.kaggle.model.{Description, ProductId}
+
 /**
   * Created by freezing on 2/25/16.
   */
-object DescriptionService {
-  lazy val description = {
+class DescriptionService {
+  private lazy val descriptionMap: Map[ProductId, Description] = {
     val lines = CsvReader.readFile("/product_descriptions.csv")
-    val data = lines takeRight (lines.length - 1)
-    (data map { line =>
+    (lines map { line =>
       val cols = line.split(DELIMITER)
-      cols.head -> cols.tail
+      ProductId(cols.head) -> cols.last
     }).toMap
   }
+
+  def get(productId: ProductId): Description = descriptionMap(productId)
 }

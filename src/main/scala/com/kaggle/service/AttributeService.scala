@@ -1,20 +1,21 @@
 package com.kaggle.service
 
-import com.kaggle.model.Attribute
+import com.kaggle.model.{ProductId, RawAttribute}
+import com.kaggle.parser.CsvParser
+import org.apache.spark.rdd.{PairRDDFunctions, RDD}
 
 /**
   * Created by freezing on 2/25/16.
   */
-object AttributeService {
-  lazy val attributes = {
+class AttributeService {
+  private lazy val idAttributesMap: Map[ProductId, List[RawAttribute]] = {
     val lines = CsvReader.readFile("/attributes.csv")
-    val data = lines takeRight (lines.length - 1) filter { line => line.split(DELIMITER).length == 3}
+    val data = lines filter { line => line.split(DELIMITER).length == 3}
     data map { line =>
-      val cols = line.split(DELIMITER)
-      val productId = cols.head
-      val attributeName = cols(1)
-      val attributeValue = cols(2)
-      productId -> Attribute(attributeName, attributeValue)
-    } groupBy { case (productId, _) => productId } map { case (k, v) =>  k -> (v map { case (id, attr) => attr }) } withDefaultValue List.empty[Attribute]
+      val rawAttribute = CsvParser.parseAttribute(line)
+      (rawAttribute.productId, rawAttribute)
+    } groupBy { case (productId, _) => productId } map { case (k, v) =>  k -> (v map { case (id, attr) => attr }) } withDefaultValue List.empty[RawAttribute]
   }
+
+  def get(productId: ProductId): List[RawAttribute] = idAttributesMap(productId)
 }

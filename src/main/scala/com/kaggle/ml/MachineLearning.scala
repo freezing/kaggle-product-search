@@ -10,15 +10,11 @@ import org.apache.spark.mllib.linalg._
 /**
   * Created by freezing on 2/26/16.
   */
-class MachineLearning extends Serializable {
-  val sc = new SparkContext(new SparkConf().setAppName("KaggleProductRelevance").setMaster("local[4]"))
+class MachineLearning(implicit val sc: SparkContext) extends Serializable {
 
   var model: LinearRegressionModel = null
 
   def train(trainingData: List[(Feature, Relevance)]): Unit = {
-//    trainingData foreach {
-//      case (feature, relevance) => regression.addData(feature.coordinates.head, relevance.value)
-//    }
     val training = sc.parallelize(createTrainingSet(trainingData)).cache()
     model = LinearRegressionWithSGD.train(training, 2000, 0.2)
   }
