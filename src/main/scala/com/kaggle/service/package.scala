@@ -14,7 +14,7 @@ package object service {
     import com.kaggle.sc
     def readTextFile(file: String): RDD[String] = {
       val path = getClass.getResource(file).getFile
-      sc.textFile(path.toString)
+      sc.textFile(path.toString, 1)
 //      sc.parallelize(CsvReader.readFile(file)).cache
     }
 

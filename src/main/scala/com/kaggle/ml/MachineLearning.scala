@@ -24,11 +24,10 @@ class MachineLearning extends Serializable {
       LabeledPoint(trainFeature.relevance.value, toVector(trainFeature.feature, scalerModel))
     }
     labeledData.cache()
-    labeledData.saveAsTextFile("/home/freezing/Desktop/labeled")
 
     val algorithm = new LinearRegressionWithSGD().setIntercept(true)
     algorithm.optimizer
-      .setNumIterations(20)
+      .setNumIterations(100)
       .setRegParam(0.01)
       .setStepSize(0.1)
 
