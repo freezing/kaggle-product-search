@@ -1,5 +1,7 @@
 package com.kaggle.nlp.attribute
 
+import java.util.logging.Logger
+
 import com.kaggle.model.{CleanAttribute, RawAttribute, AttributeName}
 import com.kaggle.nlp.DataCleaner
 
@@ -7,6 +9,8 @@ import com.kaggle.nlp.DataCleaner
   * Created by freezing on 29/02/16.
   */
 class AttributeCleaner {
+  private val logger = Logger.getLogger(getClass.getName)
+
   def processName(name: String): AttributeName = {
     val lower = name.toLowerCase
     val clean = {

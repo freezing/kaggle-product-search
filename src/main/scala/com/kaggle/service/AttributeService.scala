@@ -31,8 +31,7 @@ class AttributeService extends Serializable {
   lazy val cleanAttributeMap: Map[ProductId, Map[CleanAttributeName, CleanAttribute]] = {
     logger.info("Cleaning attributes")
     val cleanMap = idAttributesMap map { case (k, v) => k -> AttributeCleaner.processAttributes(v) }
-
     logger.info("Cleaning attributes finished.")
-    cleanMap
+    cleanMap withDefaultValue Map.empty[CleanAttributeName, CleanAttribute]
   }
 }
