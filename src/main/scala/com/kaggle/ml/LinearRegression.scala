@@ -1,5 +1,7 @@
 package com.kaggle.ml
 
+import java.util.logging.Logger
+
 import scala.collection.mutable
 import scala.util.Random
 
@@ -13,6 +15,8 @@ import scala.util.Random
   * @param threshold gradient descent converge threshold
   */
 class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lambda: Double, normalize: Boolean, threshold: Double) {
+  private val logger = Logger.getLogger(getClass.getName)
+
   val rand = Random
   // All mutable since these are calculated in train method
   // and should be saved for prediction
@@ -22,10 +26,11 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
   var stdDevs: List[Double] = initStdDevs(featureSize)
 
   def train(data: List[LabeledFeature]) = {
+    logger.info(s"Started training on set of size: ${data.length}")
     if (normalize) {
+      logger.info("Normalize is set")
       calculateNormalizationParameters(data)
     }
-
     val normalizedData = scale(data)
 
     // Mutable counter to take care of maximal number of steps
@@ -33,6 +38,9 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
     var currentStep = 0
     var converged = false
     while (currentStep < numberOfSteps && !converged) {
+      if (currentStep % 30 == 0) {
+        logger.info(s"Current gradient descent step: $currentStep")
+      }
       val tmp = gradientDescentStep(theta, normalizedData)
       converged = isConverged(tmp, theta)
       currentStep += 1
@@ -45,6 +53,8 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
 
   def predict(feature: Feature): Double = predictInternal(scale(feature), theta)
 
+  def predict(features: List[Feature]): List[Double] = features map { feature => predict(feature) }
+
   private def predictInternal(feature: Feature, theta: List[Double]) = (1.0 :: feature.coordinates) X theta
 
   /**
@@ -56,6 +66,7 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
 
   /**
     * Default means should be 0.0
+ *
     * @param n number of features per item
     * @return List of n zeroes.
     */
@@ -63,6 +74,7 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
 
   /**
     * Default standard deviations should be 1.0.
+ *
     * @param n number of features per item
     * @return List of n ones.
     */
@@ -95,6 +107,7 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
   }
 
   private def calculateNormalizationParameters(data: List[LabeledFeature]): Unit = {
+    logger.info("Calculating means...")
     // Calculate means
     val tmpMeans = new mutable.MutableList[Double]
     for (j <- 0 until featureSize) {
@@ -102,12 +115,14 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
     }
     means = tmpMeans.toList
 
+    logger.info("Means calculated. Calculating standard deviations...")
     // Calculate standard deviations
     val tmpSds = new mutable.MutableList[Double]
     for (j <- 0 until featureSize) {
       tmpSds += Math.sqrt((data map { x => Math.pow(x.feature.coordinates(j) - means(j), 2.0) }).sum / data.length)
     }
     stdDevs = tmpSds.toList
+    logger.info("Normalizing finished")
   }
 
   private def scale(feature: Feature): Feature = Feature(feature.coordinates zip means zip stdDevs map { case ((x, mean), stdDev) => (x - mean) / stdDev })

@@ -35,6 +35,7 @@ object PipelineSpark extends App with Serializable {
   val testDataFeatures = SimpleFeatureExtractor.processTestDataSpark(cleanTestData)
 
   // 4. Machine Learning
+  // TODO: Change to spark
   MachineLearningCommons.train(trainDataFeatures.toLocalIterator.toList)
   val evaluations = MachineLearningCommons.predict(testDataFeatures.toLocalIterator.toList)
 

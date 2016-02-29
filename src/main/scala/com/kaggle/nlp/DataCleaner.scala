@@ -1,5 +1,7 @@
 package com.kaggle.nlp
 
+import java.util.logging.Logger
+
 import com.kaggle.model.{TestItem, CleanTestItem, CleanTrainItem, TrainItem}
 import org.apache.spark.rdd.RDD
 
@@ -13,6 +15,8 @@ import org.apache.spark.rdd.RDD
   */
 class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpellChecker, dataStemmer: DataStemmer,
                   dataTokenClassification: DataTokenClassification, dataSemanticExtraction: DataSemanticExtraction) extends Serializable {
+  private val logger = Logger.getLogger(getClass.getName)
+
   def process(data: String): List[CleanToken] = {
     dataLexer.tokenize(data) map
       dataSpellChecker.process map
@@ -22,19 +26,25 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
   }
 
   def processTestData(data: List[TestItem]): List[CleanTestItem] = {
-    data map { item =>
+    logger.info(s"Cleaning test data...")
+    val cleaned = data map { item =>
       val cleanTitle = process(item.title)
       val cleanSearchTerm = process(item.searchTerm.value)
       CleanTestItem(item, cleanTitle, cleanSearchTerm)
     }
+    logger.info(s"Cleaning test data finished.")
+    cleaned
   }
 
   def processTrainData(data: List[TrainItem]): List[CleanTrainItem] = {
-    data map { item =>
+    logger.info(s"Cleaning training data...")
+    val cleaned = data map { item =>
       val cleanTitle = process(item.rawData.title)
       val cleanSearchTerm = process(item.rawData.searchTerm.value)
       CleanTrainItem(item, cleanTitle, cleanSearchTerm)
     }
+    logger.info("Cleaning training data finished.")
+    cleaned
   }
 
   def processTestDataSpark(data: RDD[TestItem]): RDD[CleanTestItem] = {

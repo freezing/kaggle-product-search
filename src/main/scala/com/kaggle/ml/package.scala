@@ -11,7 +11,6 @@ package object ml {
     }
   }
 
-
   case class Feature(coordinates: List[Double])
   case class LabeledFeature(feature: Feature, label: Double)
 }

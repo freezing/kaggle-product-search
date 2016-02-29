@@ -4,7 +4,7 @@ import java.nio.file.Paths
 
 import com.kaggle.SubmitCsvCreator
 import com.kaggle.feature.extraction.SimpleFeatureExtractor
-import com.kaggle.ml.MachineLearningCommons
+import com.kaggle.ml.MachineLearning
 import com.kaggle.nlp.DataCleaner
 import com.kaggle.service.CsvReader
 
@@ -35,8 +35,12 @@ object Pipeline extends App with Serializable {
   val testDataFeatures = SimpleFeatureExtractor.processTestData(cleanTestData)
 
   // 4. Machine Learning
+  // TODO: Refactor so that featureSize is figured out in LinearRegression
+  val machineLearning = new MachineLearning
+  machineLearning.train(trainDataFeatures)
+  val evaluations = machineLearning.predict(testDataFeatures)
 
-  val evaluations = MachineLearningCommons.predict(testDataFeatures)
+  println(s"RMS = ${machineLearning.RMS(trainDataFeatures)}")
 
   new SubmitCsvCreator(evaluations).save(outputPath)
 }

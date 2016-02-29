@@ -1,5 +1,7 @@
 package com.kaggle.feature.extraction
 
+import java.util.logging.Logger
+
 import com.kaggle.feature.{TestFeature, TrainFeature}
 import com.kaggle.ml.Feature
 import com.kaggle.model.{CleanTestItem, CleanTrainItem, RawData}
@@ -11,6 +13,8 @@ import org.apache.spark.rdd.RDD
   * Created by freezing on 2/25/16.
   */
 class SimpleFeatureExtractor(implicit val attributeService: AttributeService, descriptionService: DescriptionService) extends Serializable {
+  private val logger = Logger.getLogger(getClass.getName)
+
   def extract(item: RawData, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Feature = {
     val titleWords = item.title.split(" ")
     val words = item.searchTerm.value.split(" ")
@@ -27,17 +31,23 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   }
 
   def processTrainData(data: List[CleanTrainItem]): List[TrainFeature] = {
-    data map { item =>
+    logger.info(s"Feature extraction for train data...")
+    val features = data map { item =>
       val feature = extract(item.original.rawData, item.cleanTitle, item.cleanSearchTerm)
       TrainFeature(feature, item.original.relevance, item.original.rawData.id)
     }
+    logger.info("Feature extraction for train data finished.")
+    features
   }
 
   def processTestData(data: List[CleanTestItem]): List[TestFeature] = {
-    data map { item =>
+    logger.info(s"Feature extraction for test data...")
+    val features = data map { item =>
       val feature = extract(item.original, item.cleanTitle, item.cleanSearchTerm)
       TestFeature(feature, item.original.id)
     }
+    logger.info(s"Feature extraction for test data finished.")
+    features
   }
 
   def processTrainDataSpark(data: RDD[CleanTrainItem]): RDD[TrainFeature] = {

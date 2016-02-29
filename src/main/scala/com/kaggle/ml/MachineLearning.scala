@@ -1,50 +1,39 @@
 package com.kaggle.ml
 
 import com.kaggle.feature.{TestFeature, TrainFeature}
-import com.kaggle.model.{Evaluation, Relevance}
-import org.apache.spark.mllib.feature.{StandardScalerModel, StandardScaler}
-import org.apache.spark.rdd.RDD
-import org.apache.spark.mllib.regression.{LinearRegressionModel, LabeledPoint, LinearRegressionWithSGD}
-import org.apache.spark.mllib.linalg._
+import com.kaggle.model.{Relevance, Evaluation}
 
 /**
-  * Created by freezing on 2/26/16.
+  * Created by freezing on 29/02/16.
   */
-class MachineLearning extends Serializable {
-  def scale(data: RDD[TrainFeature]): StandardScalerModel = {
-    val features = data map { trainFeature => toVector(trainFeature.feature) }
-    new StandardScaler(true, true) fit features
+class MachineLearning {
+  val numberOfSteps = 200
+  val alpha = 0.1
+  val lambda = 0.1
+  val normalize = true
+  val threshold = 0.1
+
+  var linearRegression: LinearRegression = null
+
+  def train(trainDataFeatures: List[TrainFeature]): Unit = {
+    val featureSize = trainDataFeatures.head.feature.coordinates.size
+    linearRegression = new LinearRegression(featureSize, numberOfSteps, alpha, lambda, normalize, threshold)
+
+    val labeledFeatures = trainDataFeatures map { case TrainFeature(feature, relevance, id) => LabeledFeature(feature, relevance.value) }
+    linearRegression.train(labeledFeatures)
   }
 
-  def train(data: RDD[TrainFeature], scalerModel: StandardScalerModel): LinearRegressionModel = {
-    val labeledData = data map { trainFeature =>
-      LabeledPoint(trainFeature.relevance.value, toVector(trainFeature.feature, scalerModel))
-    }
-    labeledData.cache()
-
-    val algorithm = new LinearRegressionWithSGD().setIntercept(true)
-    algorithm.optimizer
-      .setNumIterations(100)
-      .setRegParam(0.01)
-      .setStepSize(0.1)
-
-    algorithm run labeledData
+  def predict(testDataFeatures: List[TestFeature]): List[Evaluation] = {
+    val testData = testDataFeatures map { _.feature }
+    val predictions = linearRegression.predict(testData)
+    testDataFeatures zip predictions map { case (TestFeature(_, id), prediction) => Evaluation(id, Relevance(prediction)) }
   }
 
-  def predict(model: LinearRegressionModel, data: RDD[TestFeature], scalerModel: StandardScalerModel): RDD[Evaluation] = {
-    val vectors = data map { tf => toVector(tf.feature, scalerModel) }
-    val predictions = model predict vectors
-    predictions zip data map { case (prediction, testFeature) => Evaluation(testFeature.id, Relevance(prediction)) }
+  def RMS(labeledData: List[TrainFeature]): Double = {
+    Math.sqrt((labeledData map { case TrainFeature(feature, Relevance(label), id) =>
+      val prediction = linearRegression.predict(feature)
+      val error = prediction - label
+      error * error
+    }).sum / labeledData.length)
   }
-
-  def trainAndPredict(trainData: RDD[TrainFeature], testData: RDD[TestFeature], scalerModel: StandardScalerModel): RDD[Evaluation] = {
-    val model = train(trainData.cache, scalerModel)
-    predict(model, testData.cache, scalerModel)
-  }
-
-  private def toVector(feature: Feature, scalerModel: StandardScalerModel): Vector = scalerModel transform toVector(feature)
-
-  private def toVector(feature: Feature): Vector = Vectors dense feature.coordinates.toArray
 }
-
-object MachineLearning extends MachineLearning
