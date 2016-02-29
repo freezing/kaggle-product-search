@@ -21,6 +21,8 @@ class MachineLearning {
 
     val labeledFeatures = trainDataFeatures map { case TrainFeature(feature, relevance, id) => LabeledFeature(feature, relevance.value) }
     linearRegression.train(labeledFeatures)
+    println("Thetas")
+    linearRegression.thetas foreach { theta => println(theta)}
   }
 
   def predict(testDataFeatures: List[TestFeature]): List[Evaluation] = {

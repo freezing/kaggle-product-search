@@ -19,8 +19,10 @@ class SubmitCsvCreator(evaluations: List[Evaluation]) {
   private def makeContents: String = {
     val header = "id,relevance\n"
     val data = evaluations map { e =>
-      s"${e.id.value},${e.relevance.value}"
+      s"${e.id.value},${clamp(e.relevance.value, 1, 3)}"
     } mkString "\n"
     header + data
   }
+
+  private def clamp(value: Double, minVal: Double, maxVal: Double): Double = Math.min(maxVal, Math.max(minVal, value))
 }

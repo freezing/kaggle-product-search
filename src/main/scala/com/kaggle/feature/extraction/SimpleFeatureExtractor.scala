@@ -20,7 +20,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val words = item.searchTerm.value.split(" ")
 
     val cnt = words count { x => titleWords.contains(x) }
-    val jaccard = cnt / (titleWords.length + words.length)
+    val jaccard = cnt.toDouble / (titleWords.length + words.length)
     val queryMatch = cnt / words.length.toDouble
 
     val attrs = attributeService.get(item.productId)
