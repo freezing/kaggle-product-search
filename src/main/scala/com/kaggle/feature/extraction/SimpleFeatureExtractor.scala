@@ -1,7 +1,8 @@
 package com.kaggle.feature.extraction
 
-import com.kaggle.feature.{TestFeature, TrainFeature, Feature}
-import com.kaggle.model.{RawAttribute, CleanTestItem, CleanTrainItem, RawData}
+import com.kaggle.feature.{TestFeature, TrainFeature}
+import com.kaggle.ml.Feature
+import com.kaggle.model.{CleanTestItem, CleanTrainItem, RawData}
 import com.kaggle.nlp.CleanToken
 import com.kaggle.service.{DescriptionService, AttributeService}
 import org.apache.spark.rdd.RDD
@@ -25,14 +26,28 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     Feature(List(cnt, jaccard, queryMatch, attrCnt, brandMatches))
   }
 
-  def processTrainData(data: RDD[CleanTrainItem]): RDD[TrainFeature] = {
+  def processTrainData(data: List[CleanTrainItem]): List[TrainFeature] = {
     data map { item =>
       val feature = extract(item.original.rawData, item.cleanTitle, item.cleanSearchTerm)
       TrainFeature(feature, item.original.relevance, item.original.rawData.id)
     }
   }
 
-  def processTestData(data: RDD[CleanTestItem]): RDD[TestFeature] = {
+  def processTestData(data: List[CleanTestItem]): List[TestFeature] = {
+    data map { item =>
+      val feature = extract(item.original, item.cleanTitle, item.cleanSearchTerm)
+      TestFeature(feature, item.original.id)
+    }
+  }
+
+  def processTrainDataSpark(data: RDD[CleanTrainItem]): RDD[TrainFeature] = {
+    data map { item =>
+      val feature = extract(item.original.rawData, item.cleanTitle, item.cleanSearchTerm)
+      TrainFeature(feature, item.original.relevance, item.original.rawData.id)
+    }
+  }
+
+  def processTestDataSpark(data: RDD[CleanTestItem]): RDD[TestFeature] = {
     data map { item =>
       val feature = extract(item.original, item.cleanTitle, item.cleanSearchTerm)
       TestFeature(feature, item.original.id)

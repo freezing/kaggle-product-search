@@ -4,9 +4,9 @@ import java.nio.file.Paths
 
 import com.kaggle.SubmitCsvCreator
 import com.kaggle.feature.extraction.SimpleFeatureExtractor
-import com.kaggle.ml.MachineLearning
+import com.kaggle.ml.MachineLearningCommons
 import com.kaggle.nlp.DataCleaner
-import com.kaggle.service.SparkFileReader
+import com.kaggle.service.CsvReader
 
 /**
   * Created by freezing on 2/25/16.
@@ -22,26 +22,21 @@ object Pipeline extends App with Serializable {
     case Seq("--outputPath", path) => Paths.get(path)
   } getOrElse { throw new Exception("No output path specified") }
 
-  System.setProperty("spark.executor.memory", "3g")
-
   // 1. Read data
-  val trainData = SparkFileReader.readTrainData("/train.csv")
-  val testData = SparkFileReader.readTestData("/test.csv")
+  val trainData = CsvReader.readTrainData("/train.csv")
+  val testData = CsvReader.readTestData("/test.csv")
 
   // 2. Clean data
   val cleanTrainData = DataCleaner.processTrainData(trainData)
   val cleanTestData = DataCleaner.processTestData(testData)
 
   // 3. Extract Features
-  val trainDataFeatures = SimpleFeatureExtractor.processTrainData(cleanTrainData).cache()
+  val trainDataFeatures = SimpleFeatureExtractor.processTrainData(cleanTrainData)
   val testDataFeatures = SimpleFeatureExtractor.processTestData(cleanTestData)
 
-//  // 4. Machine Learning
-  val scalerModel = MachineLearning.scale(trainDataFeatures)
-  MachineLearning.train(trainDataFeatures, scalerModel)
-  val evaluations = MachineLearning.trainAndPredict(trainDataFeatures, testDataFeatures, scalerModel)
+  // 4. Machine Learning
 
-  //  // 5. Save results
-//  // TODO: Use Spark for this
-  new SubmitCsvCreator(evaluations.toLocalIterator.toList).save(outputPath)
+  val evaluations = MachineLearningCommons.predict(testDataFeatures)
+
+  new SubmitCsvCreator(evaluations).save(outputPath)
 }

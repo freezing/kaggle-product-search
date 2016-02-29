@@ -1,11 +1,8 @@
 package com.kaggle.ml
 
-import com.kaggle.feature.{TestFeature, TrainFeature, Feature}
-import com.kaggle.model.{Evaluation, Id, Relevance}
-import org.apache.spark.ml.param.ParamMap
-import org.apache.spark.ml.regression.LinearRegression
+import com.kaggle.feature.{TestFeature, TrainFeature}
+import com.kaggle.model.{Evaluation, Relevance}
 import org.apache.spark.mllib.feature.{StandardScalerModel, StandardScaler}
-import org.apache.spark.mllib.optimization.SquaredL2Updater
 import org.apache.spark.rdd.RDD
 import org.apache.spark.mllib.regression.{LinearRegressionModel, LabeledPoint, LinearRegressionWithSGD}
 import org.apache.spark.mllib.linalg._

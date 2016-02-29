@@ -9,7 +9,7 @@ import org.apache.spark.rdd.{PairRDDFunctions, RDD}
   */
 class AttributeService extends Serializable {
   private lazy val idAttributesMap: Map[ProductId, List[RawAttribute]] = {
-    val lines = CsvReader.readFile("/attributes.csv")
+    val lines = CsvReader.readTextFile("/attributes.csv")
     val data = lines filter { line => line.split(DELIMITER).length == 3}
     data map { line =>
       val rawAttribute = CsvParser.parseAttribute(line)

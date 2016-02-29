@@ -21,7 +21,7 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
       dataSemanticExtraction.process
   }
 
-  def processTestData(data: RDD[TestItem]): RDD[CleanTestItem] = {
+  def processTestData(data: List[TestItem]): List[CleanTestItem] = {
     data map { item =>
       val cleanTitle = process(item.title)
       val cleanSearchTerm = process(item.searchTerm.value)
@@ -29,7 +29,23 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     }
   }
 
-  def processTrainData(data: RDD[TrainItem]): RDD[CleanTrainItem] = {
+  def processTrainData(data: List[TrainItem]): List[CleanTrainItem] = {
+    data map { item =>
+      val cleanTitle = process(item.rawData.title)
+      val cleanSearchTerm = process(item.rawData.searchTerm.value)
+      CleanTrainItem(item, cleanTitle, cleanSearchTerm)
+    }
+  }
+
+  def processTestDataSpark(data: RDD[TestItem]): RDD[CleanTestItem] = {
+    data map { item =>
+      val cleanTitle = process(item.title)
+      val cleanSearchTerm = process(item.searchTerm.value)
+      CleanTestItem(item, cleanTitle, cleanSearchTerm)
+    }
+  }
+
+  def processTrainDataSpark(data: RDD[TrainItem]): RDD[CleanTrainItem] = {
     data map { item =>
       val cleanTitle = process(item.rawData.title)
       val cleanSearchTerm = process(item.rawData.searchTerm.value)

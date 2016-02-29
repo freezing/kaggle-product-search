@@ -17,7 +17,7 @@ import com.kaggle.service.SparkFileReader
   * 4. Machine LearningR
   * 5. Save results
   */
-object Pipeline2 extends App with Serializable {
+object PipelineSpark extends App with Serializable {
   val outputPath = args.toSeq sliding 2 collectFirst {
     case Seq("--outputPath", path) => Paths.get(path)
   } getOrElse { throw new Exception("No output path specified") }
@@ -27,12 +27,12 @@ object Pipeline2 extends App with Serializable {
   val testData = SparkFileReader.readTestData("/test.csv")
 
   // 2. Clean data
-  val cleanTrainData = DataCleaner.processTrainData(trainData)
-  val cleanTestData = DataCleaner.processTestData(testData)
+  val cleanTrainData = DataCleaner.processTrainDataSpark(trainData)
+  val cleanTestData = DataCleaner.processTestDataSpark(testData)
 
   // 3. Extract Features
-  val trainDataFeatures = SimpleFeatureExtractor.processTrainData(cleanTrainData).cache()
-  val testDataFeatures = SimpleFeatureExtractor.processTestData(cleanTestData)
+  val trainDataFeatures = SimpleFeatureExtractor.processTrainDataSpark(cleanTrainData).cache()
+  val testDataFeatures = SimpleFeatureExtractor.processTestDataSpark(cleanTestData)
 
   // 4. Machine Learning
   MachineLearningCommons.train(trainDataFeatures.toLocalIterator.toList)
