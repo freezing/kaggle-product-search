@@ -2,7 +2,8 @@ package com.kaggle.service
 
 import java.util.logging.Logger
 
-import com.kaggle.model.{ProductId, RawAttribute}
+import com.kaggle.model.{CleanAttribute, ProductId, RawAttribute}
+import com.kaggle.nlp.attribute.{CleanAttributeName, AttributeCleaner}
 import com.kaggle.parser.CsvParser
 
 /**
@@ -24,4 +25,14 @@ class AttributeService extends Serializable {
   }
 
   def get(productId: ProductId): List[RawAttribute] = idAttributesMap(productId)
+
+  def getClean(productId: ProductId): Map[CleanAttributeName, CleanAttribute] = cleanAttributeMap(productId)
+
+  lazy val cleanAttributeMap: Map[ProductId, Map[CleanAttributeName, CleanAttribute]] = {
+    logger.info("Cleaning attributes")
+    val cleanMap = idAttributesMap map { case (k, v) => k -> AttributeCleaner.processAttributes(v) }
+
+    logger.info("Cleaning attributes finished.")
+    cleanMap
+  }
 }

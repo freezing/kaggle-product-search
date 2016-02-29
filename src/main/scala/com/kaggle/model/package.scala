@@ -1,6 +1,7 @@
 package com.kaggle
 
 import com.kaggle.nlp.CleanToken
+import com.kaggle.nlp.attribute.CleanAttributeName
 
 /**
   * Created by freezing on 2/25/16.
@@ -8,9 +9,9 @@ import com.kaggle.nlp.CleanToken
 package object model {
   type RawTitle = String
   type Description = String
-  type AttributeName = String
   type AttributeValue = String
 
+  case class AttributeName(original: String, clean: CleanAttributeName)
   case class Id(value: String) extends AnyVal
   case class ProductId(value: String) extends AnyVal
   case class Relevance(value: Double) extends AnyVal
@@ -18,6 +19,8 @@ package object model {
   case class RawSearchTerm(value: String) extends AnyVal
   case class RawAttribute(productId: ProductId, name: AttributeName, value: AttributeValue)
   case class RawDescription(productId: ProductId, value: Description)
+
+  case class CleanAttribute(productId: ProductId, name: AttributeName, value: AttributeValue, cleanValue: List[CleanToken])
 
   trait RawData {
     val id: Id

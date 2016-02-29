@@ -4,7 +4,7 @@ import java.util.logging.Logger
 
 import com.kaggle.feature.{TestFeature, TrainFeature}
 import com.kaggle.ml.Feature
-import com.kaggle.model.{CleanTestItem, CleanTrainItem, RawData}
+import com.kaggle.model.{ProductId, CleanTestItem, CleanTrainItem, RawData}
 import com.kaggle.nlp.CleanToken
 import com.kaggle.service.{DescriptionService, AttributeService}
 import org.apache.spark.rdd.RDD
@@ -14,20 +14,37 @@ import org.apache.spark.rdd.RDD
   */
 class SimpleFeatureExtractor(implicit val attributeService: AttributeService, descriptionService: DescriptionService) extends Serializable {
   private val logger = Logger.getLogger(getClass.getName)
+  import com.kaggle.nlp.attribute._
 
   def extract(item: RawData, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Feature = {
-    val titleWords = item.title.split(" ")
-    val words = item.searchTerm.value.split(" ")
+    val cleanTitleSet = (cleanTitle map { _.stemmedValue }).toSet
 
-    val cnt = words count { x => titleWords.contains(x) }
-    val jaccard = cnt.toDouble / (titleWords.length + words.length)
-    val queryMatch = cnt / words.length.toDouble
+    val titleMatchCount = calcMatchCount(cleanTitleSet, cleanSearchTerm)
 
-    val attrs = attributeService.get(item.productId)
-    val attrCnt = attrs count { attr => (words collect { case w if attr.value.toLowerCase().contains(w.toLowerCase()) => w }).length > 0 }
-    val brandMatches = attrs count { attr => (words collect { case w if attr.name.toLowerCase.contains("brand") && attr.value.toLowerCase().contains(w.toLowerCase()) => w }).length > 0 }
+    val jaccard = titleMatchCount.toDouble / (cleanTitleSet.size + cleanSearchTerm.size)
+    val queryMatch = titleMatchCount.toDouble / cleanSearchTerm.size
+    val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm)
 
-    Feature(List(cnt, jaccard, queryMatch, attrCnt, brandMatches))
+    Feature(List(jaccard, queryMatch, brandFeature))
+  }
+
+  private def extractBrandFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
+    val attr = attributeService.getClean(productId)
+    attr.get(BRAND) match {
+      case None => 0.0
+      case Some(value) =>
+        // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
+        calcMatchCount(value.cleanValue, cleanSearchTerm).toDouble / value.cleanValue.length
+    }
+  }
+
+  private def calcMatchCount(a: List[CleanToken], b: List[CleanToken]): Int = {
+    val bSet = b.toSet
+    a count { x => bSet contains x }
+  }
+
+  private def calcMatchCount(titleSet: Set[String], searchTerm: List[CleanToken]): Double = {
+    searchTerm count { token => titleSet.contains(token.stemmedValue) }
   }
 
   def processTrainData(data: List[CleanTrainItem]): List[TrainFeature] = {

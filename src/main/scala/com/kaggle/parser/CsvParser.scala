@@ -1,6 +1,8 @@
 package com.kaggle.parser
 
 import com.kaggle.model._
+import com.kaggle.nlp.DataCleaner
+import com.kaggle.nlp.attribute.AttributeCleaner
 import com.kaggle.service._
 
 /**
@@ -30,7 +32,7 @@ object CsvParser {
   def parseAttribute(line: String): RawAttribute = {
     val cols = line.split(DELIMITER)
     val productId = ProductId(cols.head)
-    val attributeName = cols(1)
+    val attributeName = AttributeCleaner.processName(cols(1))
     val attributeValue = cols(2)
     RawAttribute(productId, attributeName, attributeValue)
   }
