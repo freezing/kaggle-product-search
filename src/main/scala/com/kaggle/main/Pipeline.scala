@@ -2,7 +2,7 @@ package com.kaggle.main
 
 import java.nio.file.Paths
 
-import com.kaggle.SubmitCsvCreator
+import com.kaggle.{DebugCsvCreator, SubmitCsvCreator}
 import com.kaggle.feature.extraction.SimpleFeatureExtractor
 import com.kaggle.ml.MachineLearning
 import com.kaggle.nlp.DataCleaner
@@ -22,6 +22,11 @@ object Pipeline extends App with Serializable {
     case Seq("--outputPath", path) => Paths.get(path)
   } getOrElse { throw new Exception("No output path specified") }
 
+
+  val debugOutputPath = args.toSeq sliding 2 collectFirst {
+    case Seq("--debugOutputPath", path) => Paths.get(path)
+  } getOrElse { throw new Exception("No debug output path specified") }
+
   // 1. Read data
   val trainData = CsvReader.readTrainData("/train.csv")
   val testData = CsvReader.readTestData("/test.csv")
@@ -39,6 +44,8 @@ object Pipeline extends App with Serializable {
   val machineLearning = new MachineLearning
   machineLearning.train(trainDataFeatures)
   val evaluations = machineLearning.predict(testDataFeatures)
+
+  new DebugCsvCreator(evaluations, testDataFeatures, testData).save(debugOutputPath)
 
   println(s"RMS = ${machineLearning.RMS(trainDataFeatures)}")
 
