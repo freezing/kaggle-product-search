@@ -8,6 +8,7 @@ package com.kaggle.nlp
   * - batf -> bath; wrong letter
   * - sponge -> spounge; missing letter
   * - lightbulb -> light bulb; space error - in this case it is split in two tokens (order MUST be preserved)
+  * - 1x3 -> 1 x 3
   */
 class DataSpellChecker extends Serializable {
   // TODO: Not implemented

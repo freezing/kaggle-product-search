@@ -10,7 +10,7 @@ import com.kaggle.service._
   */
 object CsvParser {
   def parseTrainData(line: String): TrainItem = {
-    val cols = line.split(DELIMITER)
+    val cols = line.split(DELIMITER) map cleanQuotes
     val rawData = new RawData {
       override val searchTerm: RawSearchTerm = RawSearchTerm(cols(3))
       override val title: RawTitle = cols(2)
@@ -21,7 +21,7 @@ object CsvParser {
   }
 
   def parseTestData(line: String): TestItem = {
-    val cols = line.split(DELIMITER)
+    val cols = line.split(DELIMITER) map cleanQuotes
     val id = Id(cols.head)
     val productId = ProductId(cols(1))
     val title = cols(2)
@@ -30,10 +30,15 @@ object CsvParser {
   }
 
   def parseAttribute(line: String): RawAttribute = {
-    val cols = line.split(DELIMITER)
+    val cols = line.split(DELIMITER) map cleanQuotes
     val productId = ProductId(cols.head)
     val attributeName = AttributeCleaner.processName(cols(1))
     val attributeValue = cols(2)
     RawAttribute(productId, attributeName, attributeValue)
+  }
+
+  private def cleanQuotes(value: String): String = {
+    //if (value.startsWith("\"") && value.endsWith("\"") value
+    value.replace("\"", "")
   }
 }

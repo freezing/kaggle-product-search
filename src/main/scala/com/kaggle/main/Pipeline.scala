@@ -2,7 +2,10 @@ package com.kaggle.main
 
 import java.nio.file.Paths
 
-import com.kaggle.{DebugCsvCreator, SubmitCsvCreator}
+import com.kaggle.debug.{TrainDebugCsvCreator, DebugCsvCreator}
+import com.kaggle.feature.TestFeature
+import com.kaggle.model.{TestItem, Relevance, Id, Evaluation}
+import com.kaggle.SubmitCsvCreator
 import com.kaggle.feature.extraction.SimpleFeatureExtractor
 import com.kaggle.ml.MachineLearning
 import com.kaggle.nlp.DataCleaner
@@ -22,10 +25,13 @@ object Pipeline extends App with Serializable {
     case Seq("--outputPath", path) => Paths.get(path)
   } getOrElse { throw new Exception("No output path specified") }
 
+  val debugTrainOutputPath = args.toSeq sliding 2 collectFirst {
+    case Seq("--debugTrainOutputPath", path) => Paths.get(path)
+  } getOrElse { throw new Exception("No debug train output path specified") }
 
-  val debugOutputPath = args.toSeq sliding 2 collectFirst {
-    case Seq("--debugOutputPath", path) => Paths.get(path)
-  } getOrElse { throw new Exception("No debug output path specified") }
+  val debugTestOutputPath = args.toSeq sliding 2 collectFirst {
+    case Seq("--debugTestOutputPath", path) => Paths.get(path)
+  } getOrElse { throw new Exception("No debug test output path specified") }
 
   // 1. Read data
   val trainData = CsvReader.readTrainData("/train.csv")
@@ -45,7 +51,11 @@ object Pipeline extends App with Serializable {
   machineLearning.train(trainDataFeatures)
   val evaluations = machineLearning.predict(testDataFeatures)
 
-  new DebugCsvCreator(evaluations, testDataFeatures, testData).save(debugOutputPath)
+  // Output debug train data
+  val trainEvaluations = machineLearning.predict(trainDataFeatures map { feature => TestFeature(feature.feature, feature.id) })
+  new TrainDebugCsvCreator(trainEvaluations, trainDataFeatures, trainData).save(debugTrainOutputPath)
+
+  new DebugCsvCreator(evaluations, testDataFeatures, testData).save(debugTestOutputPath)
 
   println(s"RMS = ${machineLearning.RMS(trainDataFeatures)}")
 
