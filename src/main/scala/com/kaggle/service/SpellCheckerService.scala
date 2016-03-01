@@ -13,5 +13,5 @@ class SpellCheckerService {
     }).toMap
   }
 
-  def getMatches(key: String) = dictionary.getOrElse(key, List(key))
+  def getMatches(key: String) = dictionary.getOrElse(key, List.empty[String])
 }
