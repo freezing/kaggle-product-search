@@ -17,6 +17,8 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   import com.kaggle.nlp.attribute._
 
   def extract(item: RawData, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Feature = {
+    val allWords = getAllWords(item.productId, cleanTitle, cleanSearchTerm)
+
     val cleanTitleSet = (cleanTitle map { _.stemmedValue }).toSet
 
     val titleMatchCount = calcMatchCount(cleanTitleSet, cleanSearchTerm)
@@ -26,9 +28,15 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val searchInTitleContained = containCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
     val titleInSearchContained = containCounts(cleanTitle, cleanSearchTerm).toDouble / cleanSearchTerm.length
     val abbreviationMatches = abbreviationCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
+    val searchTermCountAgainstAllWords = calcMatchCount(allWords map { _.stemmedValue }, cleanSearchTerm)
  //   val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm)
 
-    Feature(List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches))
+    Feature(List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords))
+  }
+
+  private def getAllWords(productId: ProductId, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Set[CleanToken] = {
+    // TODO: ADd attribute name
+    (attributeService.getClean(productId) flatMap { case (k, v) => v.cleanValue }).toSet union cleanTitle.toSet union descriptionService.getClean(productId).toSet
   }
 
   private def abbreviationCounts(searchTerm: List[CleanToken], cleanTitle: List[CleanToken]): Int = {
@@ -57,9 +65,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
 
   private def containCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
     a map { case CleanToken (_, s, _, _) =>
-//      println("Checking: " + s)
       (b map { case CleanToken(_, w, _, _) =>
-//          println("   with: " + w)
           if (w.contains(s)) 1 else 0
       }).sum
     } count { _ > 0 }
@@ -71,16 +77,11 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
       case None => 0.0
       case Some(value) =>
         // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
-        calcMatchCount(value.cleanValue, cleanSearchTerm).toDouble / value.cleanValue.length
+        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
     }
   }
 
-  private def calcMatchCount(a: List[CleanToken], b: List[CleanToken]): Int = {
-    val bSet = b.toSet
-    a count { x => bSet contains x }
-  }
-
-  private def calcMatchCount(titleSet: Set[String], searchTerm: List[CleanToken]): Double = {
+  private def calcMatchCount(titleSet: Set[String], searchTerm: List[CleanToken]): Int = {
     searchTerm count { token => titleSet.contains(token.stemmedValue) }
   }
 

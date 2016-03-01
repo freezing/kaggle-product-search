@@ -1,7 +1,5 @@
 package com.kaggle
 
-import com.kaggle.service.SpellCheckerService
-
 /**
   * Created by freezing on 28/02/16.
   */

@@ -3,6 +3,7 @@ package com.kaggle.service
 import java.util.logging.Logger
 
 import com.kaggle.model.{Description, ProductId}
+import com.kaggle.nlp.{DataCleaner, CleanToken}
 
 /**
   * Created by freezing on 2/25/16.
@@ -21,7 +22,13 @@ class DescriptionService extends Serializable {
     descriptions
   }
 
+  private lazy val cleanDescriptions: Map[ProductId, List[CleanToken]] = {
+    descriptionMap map { case (k, v) => k -> DataCleaner.process(v) }
+  }
+
   def get(productId: ProductId): Description = descriptionMap(productId)
+
+  def getClean(productId: ProductId): List[CleanToken] = cleanDescriptions(productId)
 
   def getAllRaw = descriptionMap
 }
