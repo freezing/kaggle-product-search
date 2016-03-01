@@ -30,7 +30,7 @@ object SpellChekerDictionaryCreator extends App {
 
   logger.info("Parsing words from all files...")
   val words = (parseTrainWords(trainData) union parseTestWords(testData) union parseAttributes(attributes) union parseDescriptions(descriptions)
-    flatMap { w => w.split("[\\W\\d]") } filter { _.length > 0 }).distinct
+    flatMap { w => w.split("[\\W\\d]") } filter { _.length > 0 } map { _.toLowerCase }).distinct
   logger.info("Parsing words has finished.")
   val dictionary = new scala.collection.mutable.HashMap[String, scala.collection.mutable.MutableList[String]]
 
