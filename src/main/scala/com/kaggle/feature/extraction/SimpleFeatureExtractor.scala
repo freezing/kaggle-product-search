@@ -23,9 +23,15 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
 
     val jaccard = titleMatchCount.toDouble / (cleanTitleSet.size + cleanSearchTerm.size)
     val queryMatch = titleMatchCount.toDouble / cleanSearchTerm.size
+    val searchInTitleContainCounts = containCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
+    val titleInSearchContainCounts = containCounts(cleanTitle, cleanSearchTerm).toDouble / cleanSearchTerm.length
  //   val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm)
 
-    Feature(List(jaccard, queryMatch))
+    Feature(List(jaccard, queryMatch, searchInTitleContainCounts, titleInSearchContainCounts))
+  }
+
+  private def containCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
+    a count { case CleanToken(_, s, _, _) => (b collectFirst { case CleanToken(_, w, _, _) => w.contains(s) }).isDefined }
   }
 
   private def extractBrandFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
