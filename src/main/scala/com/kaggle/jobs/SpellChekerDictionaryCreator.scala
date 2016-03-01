@@ -36,11 +36,7 @@ object SpellChekerDictionaryCreator extends App {
 
   logger.info(s"Creating dictionary for ${words.length} words...")
   words foreach { w =>
-    val variations = {
-      if (w.length >= 3 && w.length <= 4) NlpUtils.smallErrors(w, 1)
-      else if (w.length > 4) NlpUtils.smallErrors(w, 2)
-      else List(w)
-    }
+    val variations = NlpUtils.smallErrorsFailSafe(w)
 
     variations foreach { s =>
       if (!dictionary.contains(s)) dictionary.put(s, new mutable.MutableList[String])

@@ -22,7 +22,7 @@ class DataSpellChecker(implicit val spellCheckerService: SpellCheckerService) ex
     else {
       // TODO: Figure out what is the best match if there are multiple choices
       // For now just choose first one
-      (NlpUtils.smallErrors(w, 2) sortBy { _.length }).reverse collectFirst {
+      (NlpUtils.smallErrorsFailSafe(w) sortBy { _.length }).reverse collectFirst {
         case s if spellCheckerService.getMatches(s).nonEmpty => spellCheckerService.getMatches(s)
       } match {
         case Some(matches) =>
