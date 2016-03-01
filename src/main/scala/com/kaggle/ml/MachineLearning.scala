@@ -7,8 +7,8 @@ import com.kaggle.model.{Relevance, Evaluation}
   * Created by freezing on 29/02/16.
   */
 class MachineLearning {
-  val numberOfSteps = 500
-  val alpha = 0.2
+  val numberOfSteps = 5000
+  val alpha = 0.3
   val lambda = 0.1
   val normalize = true
   val threshold = 0.1

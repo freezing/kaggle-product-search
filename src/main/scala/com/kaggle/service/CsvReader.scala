@@ -1,6 +1,7 @@
 package com.kaggle.service
 
 import java.nio.file.{Paths, Files}
+import java.util.logging.Logger
 
 import com.kaggle.model.{TestItem, TrainItem}
 import com.kaggle.parser.CsvParser
@@ -10,8 +11,12 @@ import com.kaggle.parser.CsvParser
   */
 object CsvReader {
   def readTextFile(file: String): List[String] = {
+    val logger = Logger.getLogger(getClass.getName)
+    logger.info(s"Reading $file...")
     val path = getClass.getResource(file).getFile
-    new String(Files.readAllBytes(Paths.get(path.toString))).split("\n").toList
+    val ret = new String(Files.readAllBytes(Paths.get(path.toString))).split("\n").toList
+    logger.info(s"Finished reading $file.")
+    ret
   }
 
   def readTrainData(file: String): List[TrainItem] = readTextFile(file) map { line => CsvParser.parseTrainData(line) }

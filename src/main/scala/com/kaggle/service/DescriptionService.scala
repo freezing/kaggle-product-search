@@ -22,4 +22,6 @@ class DescriptionService extends Serializable {
   }
 
   def get(productId: ProductId): Description = descriptionMap(productId)
+
+  def getAllRaw = descriptionMap
 }

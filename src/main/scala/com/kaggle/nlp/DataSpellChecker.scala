@@ -12,7 +12,9 @@ package com.kaggle.nlp
   */
 class DataSpellChecker extends Serializable {
   // TODO: Not implemented
-  def process(token: Token): SpellCorrectedToken = token
+  def process(token: Token): SpellCorrectedToken = {
+    token
+  }
 
   def process(tokens: List[Token]): List[SpellCorrectedToken] = tokens map process
 }
