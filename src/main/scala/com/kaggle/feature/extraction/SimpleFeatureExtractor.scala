@@ -23,11 +23,36 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
 
     val jaccard = titleMatchCount.toDouble / (cleanTitleSet.size + cleanSearchTerm.size)
     val queryMatch = titleMatchCount.toDouble / cleanSearchTerm.size
-    val searchInTitleContainCounts = containCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
-    val titleInSearchContainCounts = containCounts(cleanTitle, cleanSearchTerm).toDouble / cleanSearchTerm.length
+    val searchInTitleContained = containCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
+    val titleInSearchContained = containCounts(cleanTitle, cleanSearchTerm).toDouble / cleanSearchTerm.length
+    val abbreviationMatches = abbreviationCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
  //   val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm)
 
-    Feature(List(jaccard, queryMatch, searchInTitleContainCounts, titleInSearchContainCounts))
+    Feature(List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches))
+  }
+
+  private def abbreviationCounts(searchTerm: List[CleanToken], cleanTitle: List[CleanToken]): Int = {
+    multiTokenAbbreviationCount(searchTerm, cleanTitle) + singleTokenAbbreviationCount(searchTerm, cleanTitle)
+  }
+
+  private def singleTokenAbbreviationCount(searchTerm: List[CleanToken], cleanTitle: List[CleanToken]): Int = {
+    // Filter only tokens of length 2 and 3
+    searchTerm filter { x => x.stemmedValue.length >= 2 && x.stemmedValue.length <= 3 } count { case CleanToken(_, s, _, _) =>
+      existsAbbreviation(s, cleanTitle)
+    }
+  }
+
+  private def existsAbbreviation(s: String, cleanTitle: List[CleanToken]): Boolean =
+    cleanTitle map { _.stemmedValue } sliding s.length map { x => x map { _.charAt(0) } mkString "" } contains s
+
+  private def multiTokenAbbreviationCount(searchTerm: List[CleanToken], cleanTitle: List[CleanToken]): Int = {
+    val abbreviations2 = (cleanTitle map { _.stemmedValue.charAt(0) } sliding 2 map { _ mkString "" }).toSet
+    val cnt2 = searchTerm map { _.stemmedValue } filter { _.length == 1 } sliding 2 map { _ mkString "" } count { x => abbreviations2.contains(x) }
+
+    val abbreviations3 = (cleanTitle map { _.stemmedValue.charAt(0) } sliding 3 map { _ mkString "" }).toSet
+    val cnt3 = searchTerm map { _.stemmedValue } filter { _.length == 1 } sliding 3 map { _ mkString "" } count { x => abbreviations3.contains(x) }
+
+    cnt2 + cnt3
   }
 
   private def containCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
