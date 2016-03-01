@@ -9,9 +9,9 @@ class SpellCheckerService {
       val cols = line.split(":")
       val key = cols.head
       val values = cols.last.split(",")
-      key -> values.toList
+      key -> values.toSet
     }).toMap
   }
 
-  def getMatches(key: String) = dictionary.getOrElse(key, List.empty[String])
+  def getMatches(key: String) = dictionary.getOrElse(key, Set.empty[String])
 }
