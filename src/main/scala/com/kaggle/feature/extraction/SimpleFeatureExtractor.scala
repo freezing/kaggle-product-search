@@ -31,7 +31,13 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   }
 
   private def containCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
-    a count { case CleanToken(_, s, _, _) => (b collectFirst { case CleanToken(_, w, _, _) => w.contains(s) }).isDefined }
+    a map { case CleanToken (_, s, _, _) =>
+//      println("Checking: " + s)
+      (b map { case CleanToken(_, w, _, _) =>
+//          println("   with: " + w)
+          if (w.contains(s)) 1 else 0
+      }).sum
+    } count { _ > 0 }
   }
 
   private def extractBrandFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
