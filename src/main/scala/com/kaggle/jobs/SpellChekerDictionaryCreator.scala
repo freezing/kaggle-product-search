@@ -5,7 +5,7 @@ import java.util.logging.Logger
 
 import com.kaggle.SpellCheckerDictionaryFileCreator
 import com.kaggle.model.{Description, RawAttribute, TestItem, TrainItem}
-import com.kaggle.nlp.DataLexer
+import com.kaggle.nlp.{NlpUtils, DataLexer}
 import com.kaggle.service.{AttributeService, DescriptionService, CsvReader}
 
 import scala.collection.mutable
@@ -36,8 +36,8 @@ object SpellChekerDictionaryCreator extends App {
   logger.info(s"Creating dictionary for ${words.length} words...")
   words foreach { w =>
     val variations = {
-      if (w.length >= 3 && w.length <= 4) smallErrors(w, 1)
-      else if (w.length > 4) smallErrors(w, 2)
+      if (w.length >= 3 && w.length <= 4) NlpUtils.smallErrors(w, 1)
+      else if (w.length > 4) NlpUtils.smallErrors(w, 2)
       else List(w)
     }
 
@@ -79,18 +79,4 @@ object SpellChekerDictionaryCreator extends App {
     logger.info("Parsing test words has finished")
     ret
   }
-
-  private def smallErrors(w: String): List[String] = smallErrors(w, 1) union smallErrors(w, 2)
-
-  // TODO: Add memoization
-  private def smallErrors(w: String, d: Int): List[String] = {
-    if (d > w.length) throw new IllegalArgumentException(s"Distance $d is greater than word length: ${w.length}")
-    d match {
-      case 0 => List(w)
-      case 1 => smallErrors1(w)
-      case k => smallErrors1(w) flatMap { s => smallErrors(s, d - 1) }
-    }
-  }
-
-  private def smallErrors1(w: String): List[String] = (0 until w.length map { idx => w.substring(0, idx) + w.substring(idx + 1) }).toList
 }

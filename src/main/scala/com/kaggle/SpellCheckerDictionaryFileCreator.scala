@@ -9,10 +9,12 @@ import java.nio.file.Path
 class SpellCheckerDictionaryFileCreator(dictionary: scala.collection.mutable.HashMap[String, scala.collection.mutable.MutableList[String]]) {
   def save(path: Path): Unit = {
     new PrintWriter(path.toAbsolutePath.toString) {
-      write(makeContents)
+      dictionary foreach { case (k, v) =>
+        write(makeContents(k, v))
+      }
       close()
     }
   }
 
-  private def makeContents: String = dictionary map { case (k, v) => s"$k:${v mkString ","}" } mkString "\n"
+  private def makeContents(k: String, v: scala.collection.mutable.MutableList[String]): String = s"$k:${v mkString ","}" + "\n"
 }
