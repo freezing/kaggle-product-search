@@ -44,7 +44,7 @@ object SpellChekerDictionaryCreator extends App {
 
     variations foreach { s =>
       if (!dictionary.contains(s)) dictionary.put(s, new mutable.MutableList[String])
-      dictionary.get(s).get += w
+      if (!dictionary.get(s).get.contains(w)) dictionary.get(s).get += w
     }
   }
   logger.info("Dictionary has been created.")
