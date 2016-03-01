@@ -23,7 +23,10 @@ class DescriptionService extends Serializable {
   }
 
   private lazy val cleanDescriptions: Map[ProductId, List[CleanToken]] = {
-    descriptionMap map { case (k, v) => k -> DataCleaner.process(v) }
+    logger.info("Cleaning descriptions...")
+    val ret = descriptionMap map { case (k, v) => k -> DataCleaner.process(v) }
+    logger.info("Cleaning descriptions has finished.")
+    ret
   }
 
   def get(productId: ProductId): Description = descriptionMap(productId)
