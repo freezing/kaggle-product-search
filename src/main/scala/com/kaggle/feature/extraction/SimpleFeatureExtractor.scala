@@ -46,7 +46,6 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     cleanTitle map { _.stemmedValue } sliding s.length map { x => x map { _.charAt(0) } mkString "" } contains s
 
   private def multiTokenAbbreviationCount(searchTerm: List[CleanToken], cleanTitle: List[CleanToken]): Int = {
-    cleanTitle foreach ( x => println(x.stemmedValue) )
     val abbreviations2 = (cleanTitle map { _.stemmedValue.charAt(0) } sliding 2 map { _ mkString "" }).toSet
     val cnt2 = searchTerm map { _.stemmedValue } filter { _.length == 1 } sliding 2 map { _ mkString "" } count { x => abbreviations2.contains(x) }
 
