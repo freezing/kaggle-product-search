@@ -22,7 +22,7 @@ class DataStemmer extends Serializable {
   }
 
   private def stemPlural(s: String): String = {
-    if (s.endsWith("s")) s.substring(0, s.length - 1)
+    if (s.length > 1 && s.endsWith("s")) s.substring(0, s.length - 1)
     else s
   }
 
