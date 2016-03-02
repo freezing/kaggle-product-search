@@ -18,7 +18,9 @@ object NlpUtils {
     d match {
       case 0 => List(w)
       case 1 => smallErrors1(w)
-      case k => smallErrors1(w) flatMap { s => smallErrors(s, d - 1) }
+      case k =>
+        val se1 = smallErrors1(w)
+        se1 union (se1 flatMap { s => smallErrors(s, k - 1) })
     }
   }
 

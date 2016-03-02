@@ -6,6 +6,7 @@ package com.kaggle.nlp
 // tODO: Have unit tests
 object SpellCheckerTest extends App {
   val spellChecker = new DataSpellChecker
+
   println(spellChecker.process(Token("conditiner")))
   println(spellChecker.process(Token("air")))
   println(spellChecker.process(Token("airo")))
