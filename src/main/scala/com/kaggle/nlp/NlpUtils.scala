@@ -5,8 +5,8 @@ package com.kaggle.nlp
   */
 object NlpUtils {
   def smallErrorsFailSafe(w: String): List[String] = {
-    if (w.length >= 3 && w.length <= 4) NlpUtils.smallErrors(w, 1)
-    else if (w.length > 4) NlpUtils.smallErrors(w, 0) union NlpUtils.smallErrors(w, 1) //TODO: FIgure out if want to use 2
+//    if (w.length >= 5 && w.length <= 5) NlpUtils.smallErrors(w, 1)
+    if (w.length >= 5) NlpUtils.smallErrors(w, 0) union NlpUtils.smallErrors(w, 1) //TODO: FIgure out if want to use 2
     else List(w)
   }
 
