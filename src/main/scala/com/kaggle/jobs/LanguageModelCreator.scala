@@ -64,9 +64,9 @@ object LanguageModelCreator extends App {
 
   private def postLexerProcess(token: Token): String = {
     if (isNumber(token.value)) {
-      token.value.toLowerCase
-    } else {
       "NUMBER"
+    } else {
+      token.value.toLowerCase
     }
   }
 
