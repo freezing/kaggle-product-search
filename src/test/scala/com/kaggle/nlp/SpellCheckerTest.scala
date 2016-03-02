@@ -12,5 +12,9 @@ object SpellCheckerTest extends App {
   println(spellChecker.process(Token("airo")))
   println(spellChecker.process(Token("lifht")))
   println(spellChecker.process(Token("ssink")))
-  println(spellChecker.process(Token("sunk")))
+  println(spellChecker.process(Token("sinz")))
+  println(spellChecker.process(Token("influnce")))
+  println(spellChecker.process(Token("aluminium")))
+  println(spellChecker.process(Token("aluminium")))
+  println(spellChecker.process(Token("aluminium")))
 }

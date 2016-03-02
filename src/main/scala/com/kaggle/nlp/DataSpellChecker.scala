@@ -16,20 +16,26 @@ class DataSpellChecker(implicit val spellCheckerService: SpellCheckerService) ex
   // TODO: Not implemented
   def process(token: Token): SpellCorrectedToken = {
     val w = token.value.toLowerCase
-    // Check if token exists with 0 distance
-    val w0 = spellCheckerService.getMatches(w)
-    if (w0.contains(w)) Token(w)
-    else {
-      // TODO: Figure out what is the best match if there are multiple choices
-      // For now just choose first one
-      (NlpUtils.smallErrorsFailSafe(w) sortBy { _.length }).reverse collectFirst {
-        case s if spellCheckerService.getMatches(s).nonEmpty => spellCheckerService.getMatches(s)
-      } match {
-        case Some(matches) =>
-          if (matches.nonEmpty) Token(matches.head)
-          else Token(w)
-        case None => Token(w)
+    if (w.length > 1) {
+      // Check if token exists with 0 distance
+      val w0 = spellCheckerService.getMatches(w)
+      if (w0.contains(w)) Token(w)
+      else {
+        // TODO: Figure out what is the best match if there are multiple choices
+        // For now just choose first one
+        (NlpUtils.smallErrorsFailSafe(w) sortBy {
+          _.length
+        }).reverse collectFirst {
+          case s if spellCheckerService.getMatches(s).nonEmpty => spellCheckerService.getMatches(s)
+        } match {
+          case Some(matches) =>
+            if (matches.nonEmpty) Token((matches.toList sortBy { x => Math.abs(x.length - w.length) }).head)
+            else Token(w)
+          case None => Token(w)
+        }
       }
+    } else {
+      token
     }
   }
 
