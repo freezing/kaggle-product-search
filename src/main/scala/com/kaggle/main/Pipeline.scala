@@ -4,8 +4,8 @@ import java.nio.file.Paths
 
 import com.kaggle.debug.{TrainDebugCsvCreator, DebugCsvCreator}
 import com.kaggle.feature.TestFeature
+import com.kaggle.file.SubmitCsvCreator
 import com.kaggle.model.{TestItem, Relevance, Id, Evaluation}
-import com.kaggle.SubmitCsvCreator
 import com.kaggle.feature.extraction.SimpleFeatureExtractor
 import com.kaggle.ml.MachineLearning
 import com.kaggle.nlp.DataCleaner

@@ -1,9 +1,8 @@
 package com.kaggle.main
 
 import java.nio.file.Paths
-
-import com.kaggle.SubmitCsvCreator
 import com.kaggle.feature.extraction.SimpleFeatureExtractor
+import com.kaggle.file.SubmitCsvCreator
 import com.kaggle.ml.MachineLearningCommons
 import com.kaggle.nlp.DataCleaner
 import com.kaggle.service.SparkFileReader

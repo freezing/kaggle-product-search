@@ -5,5 +5,9 @@ package com.kaggle.nlp
   */
 class DataLexer extends Serializable {
   // TODO: Not implemented
-  def tokenize(data: String): List[Token] = (data.split("[\\s-,/\\(\\)]+") filter { _.length > 0 }).toList map { x => Token(x) }
+  def tokenize(data: String): List[Token] =
+    (data.split("[\\s-,/\\(\\)\\.:]+") filter { _.length > 0 }).toList flatMap { x =>
+      // Split letters and numbers in between
+      x.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)") map { t => Token(t) }
+    }
 }

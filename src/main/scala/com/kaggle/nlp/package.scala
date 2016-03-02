@@ -17,6 +17,9 @@ package object nlp {
   case class ClassifiedToken(originalValue: OriginalValue, stemmedValue: StemmedValue, wordType: WordType)
   case class CleanToken(originalValue: OriginalValue, stemmedValue: StemmedValue, wordType: WordType, semanticType: SemanticType)
 
+  case class Sentence(words: List[String])
+  case class Bigram(w1: String, w2: String)
+
   type OriginalValue = String
   type StemmedValue = String
   type SpellCorrectedToken = Token

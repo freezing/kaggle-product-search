@@ -38,6 +38,4 @@ package object model {
   case class CleanTrainItem(original: TrainItem, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken])
 
   case class Evaluation(id: Id, relevance: Relevance)
-
-  case class Token(original: String, normalized: String)
 }
