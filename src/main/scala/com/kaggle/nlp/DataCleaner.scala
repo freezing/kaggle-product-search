@@ -29,6 +29,7 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     logger.info(s"Cleaning test data...")
     val cleaned = data map { item =>
       val cleanTitle = process(item.title)
+      if ((cleanTitle count { _.stemmedValue.length == 0 }) > 0 ) println(s"${item.title}")
       val cleanSearchTerm = process(item.searchTerm.value)
       CleanTestItem(item, cleanTitle, cleanSearchTerm)
     }
@@ -40,6 +41,7 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     logger.info(s"Cleaning training data...")
     val cleaned = data map { item =>
       val cleanTitle = process(item.rawData.title)
+      if ((cleanTitle count { _.stemmedValue.length == 0 }) > 0 ) println(s"${item.rawData.title}")
       val cleanSearchTerm = process(item.rawData.searchTerm.value)
       CleanTrainItem(item, cleanTitle, cleanSearchTerm)
     }
