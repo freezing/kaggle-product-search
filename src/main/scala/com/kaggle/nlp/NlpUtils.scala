@@ -6,7 +6,7 @@ package com.kaggle.nlp
 object NlpUtils {
   def smallErrorsFailSafe(w: String): List[String] = {
     if (w.length >= 3 && w.length <= 4) NlpUtils.smallErrors(w, 1)
-    else if (w.length > 4) NlpUtils.smallErrors(w, 1) //TODO: FIgure out if want to use 2
+    else if (w.length > 4) NlpUtils.smallErrors(w, 0) union NlpUtils.smallErrors(w, 1) //TODO: FIgure out if want to use 2
     else List(w)
   }
 
@@ -17,6 +17,7 @@ object NlpUtils {
     if (d > w.length) throw new IllegalArgumentException(s"Distance $d is greater than word length: ${w.length}")
     d match {
       case 0 => List(w)
+      case 1 => smallErrors1(w)
       case k =>
         val se1 = smallErrors1(w)
         se1 union (se1 flatMap { s => smallErrors(s, k - 1) })
