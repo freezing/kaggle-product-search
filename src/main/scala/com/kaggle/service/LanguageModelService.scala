@@ -23,7 +23,7 @@ class LanguageModelService {
       if (m.contains(w)) throw new IllegalStateException(s"Key $w already exists!")
       m.put(w, count)
     }
-    m.toMap
+    m.toMap withDefaultValue 1
   }
 
   lazy val bigramCounts = {
@@ -37,15 +37,15 @@ class LanguageModelService {
       if (m.contains(bigram)) throw new IllegalStateException(s"Key $bigram already exists!")
       m.put(bigram, count)
     }
-    m.toMap
+    m.toMap withDefaultValue 1
   }
 
   lazy val totalWordCounts = (wordCounts map { case (k, v) => v }).sum
   lazy val totalBigramCounts = (bigramCounts map { case (k, v) => v }).sum
 
   // Use logarithms so we wouldn't have to worry about floating point precission and not use BigDecimal
-  lazy val wordLogProbabilities = wordCounts map { case (k, v) => (k, Math.log(v) - Math.log(totalWordCounts)) }
-  lazy val bigramLogProbabilities = bigramCounts map { case (k, v) => (k, Math.log(v) - Math.log(totalBigramCounts)) }
+  lazy val wordLogProbabilities = wordCounts map { case (k, v) => (k, Math.log(v) - Math.log(totalWordCounts)) } withDefaultValue Math.log(1.0 / totalWordCounts)
+  lazy val bigramLogProbabilities = bigramCounts map { case (k, v) => (k, Math.log(v) - Math.log(totalBigramCounts)) } withDefaultValue Math.log(1.0 / totalBigramCounts)
 
   def logProbability(w: String) = wordLogProbabilities(w)
   def logProbability(w1: String, w2: String) = bigramLogProbabilities(Bigram(w1, w2))

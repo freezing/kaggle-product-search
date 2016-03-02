@@ -17,9 +17,18 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
                   dataTokenClassification: DataTokenClassification, dataSemanticExtraction: DataSemanticExtraction) extends Serializable {
   private val logger = Logger.getLogger(getClass.getName)
 
-  def process(data: String): List[CleanToken] = {
-    dataLexer.tokenize(data) map
-      dataSpellChecker.process map
+  val USE_SPELL_CORRECTION = true
+  val DONT_USE_SPELL_CORRECTION = false
+
+  def process(data: String, spellCorrection: Boolean = DONT_USE_SPELL_CORRECTION): List[CleanToken] = {
+    val readyData = {
+      val tokenizedData = dataLexer.tokenize(data)
+      // Spell checker is checking bigrams so need to process as whole list
+      if (spellCorrection) dataSpellChecker.process(tokenizedData)
+      else tokenizedData
+    }
+
+    readyData map
       dataStemmer.process map
       dataTokenClassification.process map
       dataSemanticExtraction.process
@@ -30,7 +39,7 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     val cleaned = data map { item =>
       val cleanTitle = process(item.title)
       if ((cleanTitle count { _.stemmedValue.length == 0 }) > 0 ) println(s"${item.title}")
-      val cleanSearchTerm = process(item.searchTerm.value)
+      val cleanSearchTerm = process(item.searchTerm.value, USE_SPELL_CORRECTION)
       CleanTestItem(item, cleanTitle, cleanSearchTerm)
     }
     logger.info(s"Cleaning test data finished.")
@@ -42,7 +51,7 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     val cleaned = data map { item =>
       val cleanTitle = process(item.rawData.title)
       if ((cleanTitle count { _.stemmedValue.length == 0 }) > 0 ) println(s"${item.rawData.title}")
-      val cleanSearchTerm = process(item.rawData.searchTerm.value)
+      val cleanSearchTerm = process(item.rawData.searchTerm.value, USE_SPELL_CORRECTION)
       CleanTrainItem(item, cleanTitle, cleanSearchTerm)
     }
     logger.info("Cleaning training data finished.")
@@ -52,7 +61,7 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
   def processTestDataSpark(data: RDD[TestItem]): RDD[CleanTestItem] = {
     data map { item =>
       val cleanTitle = process(item.title)
-      val cleanSearchTerm = process(item.searchTerm.value)
+      val cleanSearchTerm = process(item.searchTerm.value, USE_SPELL_CORRECTION)
       CleanTestItem(item, cleanTitle, cleanSearchTerm)
     }
   }
@@ -60,7 +69,7 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
   def processTrainDataSpark(data: RDD[TrainItem]): RDD[CleanTrainItem] = {
     data map { item =>
       val cleanTitle = process(item.rawData.title)
-      val cleanSearchTerm = process(item.rawData.searchTerm.value)
+      val cleanSearchTerm = process(item.rawData.searchTerm.value, USE_SPELL_CORRECTION)
       CleanTrainItem(item, cleanTitle, cleanSearchTerm)
     }
   }
