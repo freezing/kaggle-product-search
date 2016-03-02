@@ -5,7 +5,7 @@ import java.util.logging.Logger
 
 import com.kaggle.file.{BigramDictionaryFile, WordDictionaryFile}
 import com.kaggle.model._
-import com.kaggle.nlp.{Token, Bigram, Sentence, DataLexer}
+import com.kaggle.nlp._
 import com.kaggle.service.{CsvReader, AttributeService, DescriptionService}
 
 /**
@@ -60,10 +60,8 @@ object LanguageModelCreator extends App {
   new BigramDictionaryFile(bigramCounts).save(ngram2OutputPath)
   logger.info("Saving bigram counts has finished.")
 
-  private def isNumber(s: String): Boolean = s forall Character.isDigit
-
   private def postLexerProcess(token: Token): String = {
-    if (isNumber(token.value)) {
+    if (NlpUtils.isNumber(token.value)) {
       "NUMBER"
     } else {
       token.value.toLowerCase

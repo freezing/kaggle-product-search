@@ -25,4 +25,6 @@ object NlpUtils {
   }
 
   def smallErrors1(w: String): List[String] = (0 until w.length map { idx => w.substring(0, idx) + w.substring(idx + 1) }).toList
+
+  def isNumber(s: String): Boolean = s forall Character.isDigit
 }
