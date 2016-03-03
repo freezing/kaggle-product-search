@@ -35,7 +35,7 @@ public class BestCandidateFinder {
                     Double t1 = d0.get(k);
                     Double t2 = languageModelService.logProbability(w, s);
                     Double t3 = errorModelService.logProbability(original.get(i), s);
-                    Double logProbability = t1 + t2;
+                    Double logProbability = t1 + t2 + t3;
 
                     if (logProbability > best) {
                         best = logProbability;

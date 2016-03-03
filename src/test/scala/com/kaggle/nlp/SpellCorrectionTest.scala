@@ -6,7 +6,6 @@ package com.kaggle.nlp
 object SpellCorrectionTest extends App {
   val lexer = new DataLexer
   val spellChecker = new DataSpellChecker
-
   printClean("airs conditiner")
   printClean("bathroom sybks")
   printClean("bathroom ssink")
@@ -28,6 +27,21 @@ object SpellCorrectionTest extends App {
   printClean("hdx wire shelving")
   printClean("r19 insulation")
   printClean("PLATFORM FOR WASHERS")
+  printClean("bazz lighting")
+  printClean("BAZZ 10 ft. Multi-Color Self-Adhesive Cuttable Rope Lighting with Remote Control")
+
+  printClean("closetmade")
+  printClean("quikrete color")
+  printClean("DEWALT VACCUM")
+  printClean("hindges")
+  printClean("chaise")
+  printClean("ceadar")
+  printClean("cedar plank")
+  printClean("cedart board")
+  printClean("milwakee M12")
+  printClean("milwaukee m12")
+  printClean("jeld wen aurora a5001")
+  printClean("werner ladder")
 
   def printClean(s: String): Unit = println(s"Clean($s) = " + (spellChecker.process(lexer.tokenize(s)) map { _.value } mkString " "))
 }

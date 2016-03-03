@@ -7,9 +7,9 @@ class ErrorModelService {
   // TODO: TO be implemented, for now only dummy implementation
   def logProbability(input: String, correction: String): Double = {
     if (input == correction) {
-      Math.log(0.6)
+      Math.log(0.7)
     } else {
-      Math.log(0.4)
+      Math.log(0.3)
     }
   }
 }

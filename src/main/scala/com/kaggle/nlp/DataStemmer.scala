@@ -42,9 +42,9 @@ class DataStemmer extends Serializable {
     s = s.replace("pound","lb")
     s = s.replace("lb","lb")
 
-    s = s.replace("x","xby")
-    s = s.replace("*","xby")
-    s = s.replace("by","xby")
+//    s = s.replace("x","xby")
+//    s = s.replace("*","xby")
+//    s = s.replace("by","xby")
 
 //    s = s.replace("x0"," xby 0")
 //    s = s.replace("x1"," xby 1")
