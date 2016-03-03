@@ -1,6 +1,6 @@
 package com.kaggle.nlp
 
-import com.kaggle.service.{LanguageModelService, SpellCheckerService}
+import com.kaggle.service.{ErrorModelService, LanguageModelService, SpellCheckerService}
 
 /**
   * Created by freezing on 28/02/16.
@@ -13,10 +13,10 @@ import com.kaggle.service.{LanguageModelService, SpellCheckerService}
   * - 1x3 -> 1 x 3
   */
 // TODO: Implement P(w | c) - probability that correction c stands on its own - Language model
-class DataSpellChecker(implicit val spellCheckerService: SpellCheckerService, languageModelService: LanguageModelService) extends Serializable {
+class DataSpellChecker(implicit val spellCheckerService: SpellCheckerService, languageModelService: LanguageModelService, errorModelService: ErrorModelService) extends Serializable {
   val MAX_CANDIDATES = 10
 
-  val bestCandidateFinder = new BestCandidateFinder(languageModelService)
+  val bestCandidateFinder = new BestCandidateFinder(languageModelService, errorModelService)
 
   /**
     * @param token token to be processed
@@ -26,36 +26,17 @@ class DataSpellChecker(implicit val spellCheckerService: SpellCheckerService, la
     val w = token.value.toLowerCase
     val smallErrors = NlpUtils.smallErrorsFailSafe(w)
     val allCandidates = (smallErrors flatMap spellCheckerService.getMatches).distinct
-    (allCandidates sortBy languageModelService.logProbability) takeRight MAX_CANDIDATES map Token union List(token)
+    (allCandidates sortBy { x => languageModelService.logProbability(x) + errorModelService.logProbability(w, x) } takeRight MAX_CANDIDATES map Token union List(token)).distinct
   }
 
   import scala.collection.JavaConverters._
-  def process(tokens: List[Token]): List[SpellCorrectedToken] =
-    bestCandidateFinder.findBest((tokens map { x => (process(x) map { _.value }).asJava }).asJava ).asScala.toList map Token
+  def process(tokens: List[Token]): List[SpellCorrectedToken] = {
+    val candidates = (tokens map { x => (process(x) map {
+      _.value
+    }).asJava
+    }).asJava
 
-//  // TODO: Not implemented
-//  def _process(token: Token): SpellCorrectedToken = {
-//    val w = token.value.toLowerCase
-//    if (w.length > 1) {
-//      // Check if token exists with 0 distance
-//      val w0 = spellCheckerService.getMatches(w)
-//      if (w0.contains(w)) Token(w)
-//      else {
-//        // TODO: Figure out what is the best match if there are multiple choices
-//        // For now just choose first one
-//        (NlpUtils.smallErrorsFailSafe(w) sortBy {
-//          _.length
-//        }).reverse collectFirst {
-//          case s if spellCheckerService.getMatches(s).nonEmpty => spellCheckerService.getMatches(s)
-//        } match {
-//          case Some(matches) =>
-//            if (matches.nonEmpty) Token((matches.toList sortBy { x => Math.abs(x.length - w.length) }).head)
-//            else Token(w)
-//          case None => Token(w)
-//        }
-//      }
-//    } else {
-//      token
-//    }
-//  }
+    val originals = (tokens map { _.value.toLowerCase }).asJava
+    bestCandidateFinder.findBest(candidates, originals).asScala.toList map Token
+  }
 }

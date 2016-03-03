@@ -1,20 +1,22 @@
 package com.kaggle.nlp;
 
+import com.kaggle.service.ErrorModelService;
 import com.kaggle.service.LanguageModelService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BestCandidateFinder {
     private LanguageModelService languageModelService;
+    private ErrorModelService errorModelService;
 
-    public BestCandidateFinder(LanguageModelService languageModelService) {
+    public BestCandidateFinder(LanguageModelService languageModelService, ErrorModelService errorModelService) {
         this.languageModelService = languageModelService;
+        this.errorModelService = errorModelService;
     }
 
-    public List<String> findBest(List<List<String>> candidates) {
-        List<Double> d0 = init(candidates.get(0));
+    public List<String> findBest(List<List<String>> candidates, List<String> original) {
+        List<Double> d0 = init(candidates.get(0), original.get(0));
         int from[][] = new int[candidates.size()][100];
         for (int i = 0; i < from.length; i++)
             for (int j = 0; j < 100; j++) from[i][j] = -1;
@@ -32,6 +34,7 @@ public class BestCandidateFinder {
                     String w = prev.get(k);
                     Double t1 = d0.get(k);
                     Double t2 = languageModelService.logProbability(w, s);
+                    Double t3 = errorModelService.logProbability(original.get(i), s);
                     Double logProbability = t1 + t2;
 
                     if (logProbability > best) {
@@ -72,10 +75,11 @@ public class BestCandidateFinder {
         return actualOrder;
     }
 
-    private List<Double> init(List<String> a) {
+    private List<Double> init(List<String> a, String original) {
         List<Double> d = new ArrayList<Double>();
         for (int i = 0; i < a.size(); i++) {
-            d.add(languageModelService.logProbability(a.get(i)));
+            double p = languageModelService.logProbability(a.get(i)) + errorModelService.logProbability(original, a.get(i));
+            d.add(p);
         }
         return d;
     }

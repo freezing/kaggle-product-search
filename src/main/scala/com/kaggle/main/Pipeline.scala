@@ -53,7 +53,7 @@ object Pipeline extends App with Serializable {
 
   // Output debug train data
   val trainEvaluations = machineLearning.predict(trainDataFeatures map { feature => TestFeature(feature.feature, feature.id) })
-  new TrainDebugCsvCreator(trainEvaluations, trainDataFeatures, trainData).save(debugTrainOutputPath)
+  new TrainDebugCsvCreator(trainEvaluations, trainDataFeatures, cleanTrainData).save(debugTrainOutputPath)
 
   new DebugCsvCreator(evaluations, testDataFeatures, testData).save(debugTestOutputPath)
 
