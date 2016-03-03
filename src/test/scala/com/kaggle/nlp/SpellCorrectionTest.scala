@@ -26,6 +26,7 @@ object SpellCorrectionTest extends App {
 
   printClean("HDX 48 in. W x 72 in. H x 18 in. D Decorative Wire Chrome Finish Commercial Shelving Unit")
   printClean("hdx wire shelving")
+  printClean("r19 insulation")
 
   def printClean(s: String): Unit = println(s"Clean($s) = " + (spellChecker.process(lexer.tokenize(s)) map { _.value } mkString " "))
 }

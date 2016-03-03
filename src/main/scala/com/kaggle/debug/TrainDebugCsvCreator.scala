@@ -28,6 +28,6 @@ class TrainDebugCsvCreator(evaluations: List[Evaluation], trainFeatures: List[Tr
 
   private def cleanSearchAsString(item: CleanTrainItem): String = item.cleanSearchTerm mkString " "
 
-  private def featureString(a: List[Double]): String = a map { "" + _ } mkString ","
+  private def featureString(a: List[Double]): String = a map { "" + _ } mkString ("\"", ",", "\"")
 
 }
