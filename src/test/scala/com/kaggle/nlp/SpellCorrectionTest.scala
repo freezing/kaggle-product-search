@@ -43,5 +43,7 @@ object SpellCorrectionTest extends App {
   printClean("jeld wen aurora a5001")
   printClean("werner ladder")
 
+  printClean("libht bulp")
+
   def printClean(s: String): Unit = println(s"Clean($s) = " + (spellChecker.process(lexer.tokenize(s)) map { _.value } mkString " "))
 }
