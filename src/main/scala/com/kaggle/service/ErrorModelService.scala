@@ -5,12 +5,11 @@ package com.kaggle.service
   */
 class ErrorModelService {
   // TODO: TO be implemented, for now only dummy implementation
-  def logProbability(w1: String, w2: String): Double = {
-//    if (w1 == w2) {
-//      Math.log(0.6)
-//    } else {
-//      Math.log(0.4)
-//    }
-    0.0
+  def logProbability(input: String, correction: String): Double = {
+    if (input == correction) {
+      Math.log(0.9)
+    } else {
+      Math.log(0.1)
+    }
   }
 }
