@@ -14,7 +14,7 @@ import com.kaggle.service.{LanguageModelService, SpellCheckerService}
   */
 // TODO: Implement P(w | c) - probability that correction c stands on its own - Language model
 class DataSpellChecker(implicit val spellCheckerService: SpellCheckerService, languageModelService: LanguageModelService) extends Serializable {
-  val MAX_CANDIDATES = 30
+  val MAX_CANDIDATES = 10
 
   val bestCandidateFinder = new BestCandidateFinder(languageModelService)
 
@@ -24,7 +24,7 @@ class DataSpellChecker(implicit val spellCheckerService: SpellCheckerService, la
     */
   def process(token: Token): List[Token] = {
     val w = token.value.toLowerCase
-    val smallErrors = NlpUtils.smallErrors(w)
+    val smallErrors = NlpUtils.smallErrorsFailSafe(w)
     val allCandidates = (smallErrors flatMap spellCheckerService.getMatches).distinct
     (allCandidates sortBy languageModelService.logProbability) takeRight MAX_CANDIDATES map Token union List(token)
   }
