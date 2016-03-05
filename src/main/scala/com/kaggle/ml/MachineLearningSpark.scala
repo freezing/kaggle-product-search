@@ -44,7 +44,7 @@ class MachineLearningSpark extends Serializable {
 
   private def toVector(feature: Feature, scalerModel: StandardScalerModel): Vector = scalerModel transform toVector(feature)
 
-  private def toVector(feature: Feature): Vector = Vectors dense feature.coordinates.toArray
+  private def toVector(feature: Feature): Vector = Vectors dense feature.linearRegressionFeature.coordinates.toArray
 }
 
 object MachineLearningSpark extends MachineLearningSpark

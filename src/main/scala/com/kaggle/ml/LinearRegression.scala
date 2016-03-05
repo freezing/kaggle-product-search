@@ -51,11 +51,11 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
 
   def thetas = theta
 
-  def predict(feature: Feature): Double = predictInternal(scale(feature), theta)
+  def predict(feature: LinearRegressionFeature): Double = predictInternal(scale(feature), theta)
 
-  def predict(features: List[Feature]): List[Double] = features map { feature => predict(feature) }
+  def predict(features: List[LinearRegressionFeature]): List[Double] = features map { feature => predict(feature) }
 
-  private def predictInternal(feature: Feature, theta: List[Double]) = (1.0 :: feature.coordinates) X theta
+  private def predictInternal(feature: LinearRegressionFeature, theta: List[Double]) = (1.0 :: feature.coordinates) X theta
 
   /**
     *
@@ -66,7 +66,7 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
 
   /**
     * Default means should be 0.0
- *
+    *
     * @param n number of features per item
     * @return List of n zeroes.
     */
@@ -74,7 +74,7 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
 
   /**
     * Default standard deviations should be 1.0.
- *
+    *
     * @param n number of features per item
     * @return List of n ones.
     */
@@ -125,7 +125,7 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
     logger.info("Normalizing finished")
   }
 
-  private def scale(feature: Feature): Feature = Feature(feature.coordinates zip means zip stdDevs map { case ((x, mean), stdDev) => (x - mean) / stdDev })
+  private def scale(feature: LinearRegressionFeature): LinearRegressionFeature = LinearRegressionFeature(feature.coordinates zip means zip stdDevs map { case ((x, mean), stdDev) => (x - mean) / stdDev })
 
   private def scale(data: List[LabeledFeature]): List[LabeledFeature] =
     data map { case LabeledFeature(feature, label) => LabeledFeature(scale(feature), label) }

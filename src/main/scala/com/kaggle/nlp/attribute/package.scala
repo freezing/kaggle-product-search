@@ -8,4 +8,5 @@ package object attribute {
   case object UNKNOWN extends CleanAttributeName
   case object BRAND extends CleanAttributeName
   case object MATERIAL extends CleanAttributeName
+  case object PRODUCT_TYPE extends CleanAttributeName
 }

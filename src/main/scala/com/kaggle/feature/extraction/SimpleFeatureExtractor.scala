@@ -3,7 +3,8 @@ package com.kaggle.feature.extraction
 import java.util.logging.Logger
 
 import com.kaggle.feature.{TestFeature, TrainFeature}
-import com.kaggle.ml.Feature
+import com.kaggle.ml.{LinearRegressionFeature, Feature}
+import com.kaggle.ml.decisiontree.{DecisionTreeFeatures, DecisionTreeFeature}
 import com.kaggle.model.{ProductId, CleanTestItem, CleanTrainItem, RawData}
 import com.kaggle.nlp.CleanToken
 import com.kaggle.service.{DescriptionService, AttributeService}
@@ -29,9 +30,22 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val titleInSearchContained = containCounts(cleanTitle, cleanSearchTerm).toDouble / cleanSearchTerm.length
     val abbreviationMatches = abbreviationCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
     val searchTermCountAgainstAllWords = calcMatchCount(allWords map { _.stemmedValue }, cleanSearchTerm) / cleanSearchTerm.length
- //   val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm)
 
-    Feature(List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords))
+    val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm)
+    val productTypeMatches = extractProductTypeFeature(item.productId, cleanSearchTerm)
+    val queryMatchDecisionTree = if (queryMatch > 0.1) 1.0 else 0.0
+
+    // TODO: THIS MUST BE REFACTORED ASAP
+    Feature(
+      LinearRegressionFeature(
+      List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords) // Linear Regression features
+      ),
+      DecisionTreeFeatures(List(
+        DecisionTreeFeature(brandFeature),
+        DecisionTreeFeature(productTypeMatches),
+        DecisionTreeFeature(queryMatchDecisionTree)
+      ))  // Decision Tree features
+    )
   }
 
   private def getAllWords(productId: ProductId, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Set[CleanToken] = {
@@ -74,10 +88,20 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def extractBrandFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
     val attr = attributeService.getClean(productId)
     attr.get(BRAND) match {
-      case None => 0.0
-      case Some(value) =>
+      case Some(value) if calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm) > 0 => 1.0
+      case _ => 0.0
         // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
-        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
+//        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
+    }
+  }
+
+  private def extractProductTypeFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
+    val attr = attributeService.getClean(productId)
+    attr.get(PRODUCT_TYPE) match {
+      case Some(value) if calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm) > 0 => 1.0
+      case _ => 0.0
+      // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
+      //        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
     }
   }
 

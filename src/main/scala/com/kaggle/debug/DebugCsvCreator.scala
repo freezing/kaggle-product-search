@@ -20,7 +20,7 @@ class DebugCsvCreator(evaluations: List[Evaluation], testFeatures: List[TestFeat
   private def makeContents: String = {
     val header = "id,title,search,features,relevance\n"
     val data = evaluations zip testFeatures zip testData map { case ((Evaluation(Id(id), relevance), testFeature), testItem) =>
-      s"$id,${"\"" + testItem.title + "\""},${"\"" + testItem.searchTerm.value + "\""},${featureString(testFeature.feature.coordinates)},${relevance.value}"
+      s"$id,${"\"" + testItem.title + "\""},${"\"" + testItem.searchTerm.value + "\""},${featureString(testFeature.feature.linearRegressionFeature.coordinates)},${relevance.value}"
     } mkString "\n"
     header + data
   }

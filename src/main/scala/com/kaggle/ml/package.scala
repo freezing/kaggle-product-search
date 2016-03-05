@@ -1,5 +1,7 @@
 package com.kaggle
 
+import com.kaggle.ml.decisiontree.{DecisionTreeFeatures, DecisionTreeFeature}
+
 /**
   * Created by freezing on 29/02/16.
   */
@@ -11,6 +13,7 @@ package object ml {
     }
   }
 
-  case class Feature(coordinates: List[Double])
-  case class LabeledFeature(feature: Feature, label: Double)
+  case class LinearRegressionFeature(coordinates: List[Double])
+  case class Feature(linearRegressionFeature: LinearRegressionFeature, decisionTreeFeatures: DecisionTreeFeatures)
+  case class LabeledFeature(feature: LinearRegressionFeature, label: Double)
 }

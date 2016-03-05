@@ -21,6 +21,12 @@ import com.kaggle.service.CsvReader
   * 5. Save results
   */
 object Pipeline extends App with Serializable {
+  val numberOfSteps = 500
+  val alpha = 0.3
+  val lambda = 0.1
+  val normalize = true
+  val threshold = 0.1
+
   val outputPath = args.toSeq sliding 2 collectFirst {
     case Seq("--outputPath", path) => Paths.get(path)
   } getOrElse { throw new Exception("No output path specified") }
@@ -47,7 +53,7 @@ object Pipeline extends App with Serializable {
 
   // 4. Machine Learning
   // TODO: Refactor so that featureSize is figured out in LinearRegression
-  val machineLearning = new MachineLearning
+  val machineLearning = new MachineLearning(numberOfSteps, alpha, lambda, normalize, threshold)
   machineLearning.train(trainDataFeatures)
   val evaluations = machineLearning.predict(testDataFeatures)
 

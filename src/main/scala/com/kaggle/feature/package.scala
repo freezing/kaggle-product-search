@@ -1,6 +1,6 @@
 package com.kaggle
 
-import com.kaggle.ml.Feature
+import com.kaggle.ml.{LinearRegressionFeature, Feature}
 import com.kaggle.model.{Id, Relevance}
 
 /**

@@ -23,7 +23,7 @@ class TrainDebugCsvCreator(evaluations: List[Evaluation], trainFeatures: List[Tr
     val data = evaluations zip trainFeatures zip cleanTrainData map { case ((Evaluation(_, prediction), trainFeature), trainItem) =>
       s"${"\"" + trainItem.original.rawData.title + "\""},${"\"" + trainItem.original.rawData.searchTerm.value + "\""}," +
         s"${cleanValue(trainItem.cleanTitle)}," +
-        s"${cleanValue(trainItem.cleanSearchTerm)},${featureString(trainFeature.feature.coordinates)},${trainItem.original.relevance.value},${prediction.value}"
+        s"${cleanValue(trainItem.cleanSearchTerm)},${featureString(trainFeature.feature.linearRegressionFeature.coordinates)},${trainItem.original.relevance.value},${prediction.value}"
     } mkString "\n"
     header + data
   }

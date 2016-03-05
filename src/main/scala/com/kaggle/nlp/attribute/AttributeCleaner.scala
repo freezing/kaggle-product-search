@@ -16,6 +16,7 @@ class AttributeCleaner {
     val clean = {
       if (lower.contains("brand")) BRAND
       else if (lower.contains("material")) MATERIAL
+      else if (lower.contains("product type")) PRODUCT_TYPE
       else UNKNOWN
     }
     AttributeName(name, clean)

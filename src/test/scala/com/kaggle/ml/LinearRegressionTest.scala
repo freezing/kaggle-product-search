@@ -20,7 +20,7 @@ object LinearRegressionTest {
       val c = rnd.nextInt(10000)
       val res = f(a, b, c)
       //      println(s"Train($a, $b) = $res")
-      LabeledFeature(Feature(List(a, b, c)), res)
+      LabeledFeature(LinearRegressionFeature(List(a, b, c)), res)
     }).toList
 
     lr.train(data)
@@ -30,7 +30,7 @@ object LinearRegressionTest {
       val a = rnd.nextInt(20000)
       val b = rnd.nextInt(20000)
       val c = rnd.nextInt(20000)
-      val y = lr.predict(Feature(List(a, b, c)))
+      val y = lr.predict(LinearRegressionFeature(List(a, b, c)))
       val error = y - f(a, b, c)
       error * error
       //          println(s"$a ~ $b = ${lr.predict(Feature(List(a, b, c)))}    expected: ${f(a, b, c)}")
