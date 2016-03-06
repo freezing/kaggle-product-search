@@ -6,7 +6,7 @@ import com.kaggle.feature.{TestFeature, TrainFeature}
 import com.kaggle.ml.{LinearRegressionFeature, Feature}
 import com.kaggle.ml.decisiontree.{DecisionTreeFeatures, DecisionTreeFeature}
 import com.kaggle.model._
-import com.kaggle.nlp.{SemanticType, CleanToken}
+import com.kaggle.nlp.{NlpUtils, SemanticType, CleanToken}
 import com.kaggle.service.{DescriptionService, AttributeService}
 import org.apache.spark.rdd.RDD
 
@@ -20,7 +20,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   def extract(item: RawData, cleanTitle: CleanTerm, cleanSearchTerm: CleanTerm): Feature = {
     val allWords = getAllWords(item.productId, cleanTitle.tokens, cleanSearchTerm.tokens)
 
-    val titleMatchCount = containCounts(cleanTitle.tokens, cleanSearchTerm.tokens)
+    val titleMatchCount = similarCounts(cleanTitle.tokens, cleanSearchTerm.tokens)
 
     val jaccard = tryDivide(titleMatchCount.toDouble, cleanTitle.tokens.size + cleanSearchTerm.tokens.size)
     val queryMatch = tryDivide(titleMatchCount.toDouble, cleanSearchTerm.tokens.size)
@@ -33,7 +33,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val titleDimensionAttributes = getDimensionAttributes(cleanTitle.attributes)
 
     val dimensionsSpecified = if (searchDimensionAttributes.nonEmpty) 1.0 else 0.0
-    val dimensionsFeature = tryDivide(containCounts(searchDimensionAttributes, titleDimensionAttributes), searchDimensionAttributes.length)
+    val dimensionsFeature = tryDivide(similarCounts(searchDimensionAttributes, titleDimensionAttributes), searchDimensionAttributes.length)
 
     val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm.tokens)
     val productTypeMatches = extractProductTypeFeature(item.productId, cleanSearchTerm.tokens)
@@ -63,20 +63,6 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def containExactCounts(inSet: Set[String], from: List[CleanToken]): Int = {
     from count { x => inSet.contains(x.stemmedValue) }
   }
-
-  private def equal(w: String, s: String): Boolean = {
-    if (s.length <= 3 || w.length <= 3) w == s
-    else {
-      // Get all letters (union)
-      val wCounts = letterCounts(w)
-      val sCounts = letterCounts(s)
-      val differenceCount = (wCounts map { case (k, v) => Math.abs(v - sCounts(k)) }).sum
-      val similarity = differenceCount.toDouble / Math.max(w.length, s.length)
-      similarity > 0.8
-    }
-  }
-
-  private def letterCounts(s: String): Map[Char, Int] = s groupBy { x => x } map { case (k, v) => k -> v.length } withDefaultValue 0
 
   private def getDimensionAttributes(attributes: Map[SemanticType, List[CleanToken]]) = (attributes.keys flatMap { attributes(_) }).toList
 
@@ -111,10 +97,20 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     cnt2 + cnt3
   }
 
+  private def similarCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
+    a map { case CleanToken (_, s, _, _) =>
+      (b map { case CleanToken(_, w, _, _) =>
+        if (NlpUtils.equal(w, s)) 1 else 0
+      }).sum
+    } count { _ > 0 }
+  }
+
   private def containCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
     a map { case CleanToken (_, s, _, _) =>
       (b map { case CleanToken(_, w, _, _) =>
-          if (equal(w, s)) 1 else 0
+        if (w.length <= 3 && s.length <= 3) {
+          if (s==w) 1 else 0
+        } else if (w.contains(s)) 1 else 0
       }).sum
     } count { _ > 0 }
   }
@@ -122,7 +118,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def extractBrandFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
     val attr = attributeService.getClean(productId)
     attr.get(BRAND) match {
-      case Some(value) if containCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
+      case Some(value) if similarCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
       case _ => 0.0
         // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
 //        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
@@ -132,7 +128,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def extractProductTypeFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
     val attr = attributeService.getClean(productId)
     attr.get(PRODUCT_TYPE) match {
-      case Some(value) if containCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
+      case Some(value) if similarCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
       case _ => 0.0
       // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
       //        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length

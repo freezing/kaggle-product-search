@@ -29,4 +29,19 @@ object NlpUtils {
   def smallErrors1(w: String): List[String] = (0 until w.length map { idx => w.substring(0, idx) + w.substring(idx + 1) }).toList
 
   def isNumber(s: String): Boolean = s forall Character.isDigit
+
+  def equal(w: String, s: String): Boolean = {
+    if (s.length <= 3 || w.length <= 3) w == s
+    else {
+      // Get all letters (union)
+      val wCounts = letterCounts(w)
+      val sCounts = letterCounts(s)
+      val differenceCount = (wCounts map { case (k, v) => Math.abs(v - sCounts(k)) }).sum
+      val difference = differenceCount.toDouble / Math.max(w.length, s.length)
+      val lcsMatchRatio = JavaNlpUtils.lcsMatch(w, s).toDouble / Math.max(w.length, s.length)
+      (lcsMatchRatio > 0.5 && difference < 0.35) || difference < 0.2
+    }
+  }
+
+  def letterCounts(s: String): Map[Char, Int] = s groupBy { x => x } map { case (k, v) => k -> v.length } withDefaultValue 0
 }
