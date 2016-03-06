@@ -8,9 +8,15 @@ import com.kaggle.model.CleanTerm
 object SearchCorrectionTest extends App {
   val correction = new SearchCorrection
   val empty = Map.empty[SemanticType, List[CleanToken]]
+
+  println(correction.correct(CleanTerm(List(CleanToken("", "parts", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty),
+    CleanTerm(List(CleanToken("", "spiral", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty)
+  ))
+
   println(correction.correct(CleanTerm(List(CleanToken("", "atribute", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty),
     CleanTerm(List(CleanToken("", "attributes", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty)
   ))
+
   println(correction.correct(CleanTerm(List(CleanToken("", "flourescent", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty),
     CleanTerm(List(CleanToken("", "fluorescent", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty)
   ))

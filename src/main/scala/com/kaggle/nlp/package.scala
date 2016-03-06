@@ -49,5 +49,6 @@ package object nlp {
   implicit val tokenClassification = new DataTokenClassification
   implicit val semanticExtraction = new DataSemanticExtraction
   implicit val termSemanticExtraction = new TermSemanticExtraction
+  implicit val tokenMerger = new TokenMerger
   implicit val searchCorrection = new SearchCorrection
 }

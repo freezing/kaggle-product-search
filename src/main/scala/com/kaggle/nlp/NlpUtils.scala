@@ -40,10 +40,11 @@ object NlpUtils {
       // Get all letters (union)
       val wCounts = letterCounts(w)
       val sCounts = letterCounts(s)
-      val differenceCount = (wCounts map { case (k, v) => Math.abs(v - sCounts(k)) }).sum
+      val keys = wCounts.keys.toSet union sCounts.keys.toSet
+      val differenceCount = (keys.toList map { k => Math.abs(wCounts(k) - sCounts(k)) }).sum
       val difference = differenceCount.toDouble / Math.max(w.length, s.length)
       val lcsMatchRatio = JavaNlpUtils.lcsMatch(w, s).toDouble / Math.max(w.length, s.length)
-      (lcsMatchRatio > 0.5 && difference < 0.35) || difference < 0.2
+      (lcsMatchRatio > 0.5 && difference < 0.35) || difference < 0.3
     }
   }
 
