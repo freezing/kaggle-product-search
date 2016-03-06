@@ -13,7 +13,7 @@ class DataStemmer extends Serializable {
 
   lazy val stems: Map[String, String] = {
     logger.info("Loading stems...")
-    val loaded = (CsvReader.readTextFile("/stems.csv") map { x =>
+    val loaded = (CsvReader.readTextFile("/old_stems.csv") map { x =>
       val cols = x.split(",")
       cols.head -> cols.last
     }).toMap withDefault((k: String) => k)

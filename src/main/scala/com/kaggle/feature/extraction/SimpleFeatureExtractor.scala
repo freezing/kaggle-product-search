@@ -43,6 +43,12 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
       case 1 | 2 => 1.0
       case _ => 2.0
     }
+    val searchTitleCountRatio = {
+      val ratio = cleanSearchTerm.tokens.length.toDouble / cleanTitle.tokens.length
+      if (ratio <= 0.33) 0.0
+      else if (ratio <= 0.66) 1.0
+      else 2.0
+    }
 
     // TODO: THIS MUST BE REFACTORED
     Feature(
@@ -50,6 +56,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
       List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords, dimensionsFeature) // Linear Regression features
       ),
       DecisionTreeFeatures(List(
+        DecisionTreeFeature(searchTitleCountRatio),
         DecisionTreeFeature(brandFeature),
         DecisionTreeFeature(productTypeMatches),
         // TODO: Add clean search term tier

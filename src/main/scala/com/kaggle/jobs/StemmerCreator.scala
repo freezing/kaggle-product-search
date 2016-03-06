@@ -19,6 +19,6 @@ object StemmerCreator extends App {
   val languageModelService = new LanguageModelService
   val words = languageModelService.wordCounts.keys
 
-  val stems = words groupBy { w => if (w.length > 5) w.substring(0, 5) else w } map { case (k, v) => k -> v.toList }
+  val stems = words groupBy { w => if (w.length > 6) w.substring(0, 6) else w } map { case (k, v) => k -> v.toList }
   new StemFileCreator(stems).save(outputPath)
 }
