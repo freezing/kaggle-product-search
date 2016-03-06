@@ -17,17 +17,18 @@ package object nlp {
 
   case object MATERIAL extends SemanticType
 
-  case object INCH extends SemanticType
-  case object FOOT extends SemanticType
-  case object GALLON extends SemanticType
-  case object CC extends SemanticType
-  case object POUND extends SemanticType
-  case object VOLT extends SemanticType
-  case object AMP extends SemanticType
-  case object CU_FT extends SemanticType
-  case object SQ_FT extends SemanticType
-  case object OZ extends SemanticType
-  case object UNKNOWN_DIMENSION extends SemanticType
+  sealed trait DIMENSION extends SemanticType
+  case object INCH extends DIMENSION
+  case object FOOT extends DIMENSION
+  case object GALLON extends DIMENSION
+  case object CC extends DIMENSION
+  case object POUND extends DIMENSION
+  case object VOLT extends DIMENSION
+  case object AMP extends DIMENSION
+  case object CU_FT extends DIMENSION
+  case object SQ_FT extends DIMENSION
+  case object OZ extends DIMENSION
+  case object UNKNOWN_DIMENSION extends DIMENSION
 
   case class Token(value: String) extends AnyVal
   case class StemmedToken(original: OriginalValue, stemmed: StemmedValue)

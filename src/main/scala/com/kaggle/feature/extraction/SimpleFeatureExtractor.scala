@@ -6,7 +6,7 @@ import com.kaggle.feature.{TestFeature, TrainFeature}
 import com.kaggle.ml.{LinearRegressionFeature, Feature}
 import com.kaggle.ml.decisiontree.{DecisionTreeFeatures, DecisionTreeFeature}
 import com.kaggle.model._
-import com.kaggle.nlp.CleanToken
+import com.kaggle.nlp.{SemanticType, CleanToken}
 import com.kaggle.service.{DescriptionService, AttributeService}
 import org.apache.spark.rdd.RDD
 
@@ -31,6 +31,12 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val abbreviationMatches = tryDivide(abbreviationCounts(cleanSearchTerm.tokens, cleanTitle.tokens).toDouble, cleanSearchTerm.tokens.length)
     val searchTermCountAgainstAllWords = tryDivide(calcMatchCount(allWords map { _.stemmedValue }, cleanSearchTerm.tokens), cleanSearchTerm.tokens.length)
 
+    val searchDimensionAttributes = getDimensionAttributes(cleanSearchTerm.attributes)
+    val titleDimensionAttributes = getDimensionAttributes(cleanTitle.attributes)
+
+    val dimensionsSpecified = if (searchDimensionAttributes.nonEmpty) 1.0 else 0.0
+    val dimensionsFeature = tryDivide(containCounts(searchDimensionAttributes, titleDimensionAttributes), searchDimensionAttributes.length)
+    
     val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm.tokens)
     val productTypeMatches = extractProductTypeFeature(item.productId, cleanSearchTerm.tokens)
     val queryMatchDecisionTree = if (queryMatch > 0.1) 1.0 else 0.0
@@ -43,17 +49,34 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     // TODO: THIS MUST BE REFACTORED
     Feature(
       LinearRegressionFeature(
-      List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords) // Linear Regression features
+      List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords, dimensionsFeature) // Linear Regression features
       ),
       DecisionTreeFeatures(List(
         DecisionTreeFeature(brandFeature),
         DecisionTreeFeature(productTypeMatches),
         // TODO: Add clean search term tier
         //DecisionTreeFeature(queryMatchDecisionTree),
-        DecisionTreeFeature(cleanSearchTermTier)
+        DecisionTreeFeature(cleanSearchTermTier),
+        DecisionTreeFeature(dimensionsSpecified)
       ))  // Decision Tree features
     )
   }
+
+  private def equal(w: String, s: String): Boolean = {
+    if (s.length <= 3 || w.length <= 3) w == s
+    else {
+      // Get all letters (union)
+      val wCounts = letterCounts(w)
+      val sCounts = letterCounts(s)
+      val differenceCount = (wCounts map { case (k, v) => Math.abs(v - sCounts(k)) }).sum
+      val similarity = differenceCount.toDouble / Math.max(w.length, s.length)
+      similarity > 0.8
+    }
+  }
+
+  private def letterCounts(s: String): Map[Char, Int] = s groupBy { x => x } map { case (k, v) => k -> v.length } withDefaultValue 0
+
+  private def getDimensionAttributes(attributes: Map[SemanticType, List[CleanToken]]) = (attributes.keys flatMap { attributes(_) }).toList
 
   private def tryDivide(a: Double, b: Double): Double = if (Math.abs(b) < 1e-4) 0.0 else a / b
 
@@ -89,7 +112,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def containCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
     a map { case CleanToken (_, s, _, _) =>
       (b map { case CleanToken(_, w, _, _) =>
-          if (s.length > 3 && w.contains(s)) 1 else 0
+          if (equal(w, s)) 1 else 0
       }).sum
     } count { _ > 0 }
   }

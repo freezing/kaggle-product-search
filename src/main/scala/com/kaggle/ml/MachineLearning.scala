@@ -24,7 +24,7 @@ class MachineLearning(numberOfSteps: Int, alpha: Double, lambda: Double, normali
 
     println(s"Total data: ${trainDataFeatures.length}")
     trainData map { case (k, v) =>
-      println(s"Distribution for node: $k is: ${v.length}")
+      println(s"Distribution for node: $k is: ${v.length};  feature is: ${v.head.feature.decisionTreeFeatures.vector map { _.value } mkString ","}")
       val linearRegression = new LinearRegression(featureSize, numberOfSteps, alpha, lambda, normalize, threshold)
       val labeledFeatures = v map { case TrainFeature(feature, relevance, id) => LabeledFeature(feature.linearRegressionFeature, relevance.value) }
       linearRegression.train(labeledFeatures)
