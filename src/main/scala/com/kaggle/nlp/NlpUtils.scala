@@ -43,8 +43,9 @@ object NlpUtils {
       val keys = wCounts.keys.toSet union sCounts.keys.toSet
       val differenceCount = (keys.toList map { k => Math.abs(wCounts(k) - sCounts(k)) }).sum
       val difference = differenceCount.toDouble / Math.max(w.length, s.length)
+      val positionDifference = (w zip s map { case (a, b) => if (a != b) 1 else 0 }).sum
       val lcsMatchRatio = JavaNlpUtils.lcsMatch(w, s).toDouble / Math.max(w.length, s.length)
-      (lcsMatchRatio > 0.5 && difference < 0.35) || difference < 0.3
+      (positionDifference == 1 && Math.abs(w.length - s.length) <= 1) || (lcsMatchRatio > 0.5 && difference < 0.35) || difference < 0.3
     }
   }
 
@@ -62,8 +63,9 @@ object NlpUtils {
       val keys = wCounts.keys.toSet union sCounts.keys.toSet
       val differenceCount = (keys.toList map { k => Math.abs(wCounts(k) - sCounts(k)) }).sum
       val difference = differenceCount.toDouble / Math.max(w.length, s.length)
+      val positionDifference = (w zip s map { case (a, b) => if (a != b) 1 else 0 }).sum
       val lcsMatchRatio = JavaNlpUtils.lcsMatch(w, s).toDouble / Math.max(w.length, s.length)
-      (lcsMatchRatio > 0.9 && difference < 0.3) || difference < 0.15
+      (positionDifference == 1 && w.length == s.length) || (lcsMatchRatio > 0.9 && difference < 0.3) || difference < 0.15
     }
   }
 
