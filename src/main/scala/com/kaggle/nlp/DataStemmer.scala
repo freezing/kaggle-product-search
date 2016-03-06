@@ -112,9 +112,9 @@ class DataStemmer extends Serializable {
 //    s = s.replace("amps","amp. ")
 //    s = s.replace(" amp ","amp. ")
 
-    s = s.replace("whirpool","whirlpool")
-    s = s.replace("whirlpoolga", "whirlpool")
-    s = s.replace("whirlpoolstainless","whirlpool stainless")
+//    s = s.replace("whirpool","whirlpool")
+//    s = s.replace("whirlpoolga", "whirlpool")
+//    s = s.replace("whirlpoolstainless","whirlpool stainless")
 
     s = s.replace(",", "")
     StemmedToken(token.value, s)
