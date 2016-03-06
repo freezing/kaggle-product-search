@@ -14,7 +14,8 @@ import org.apache.spark.rdd.RDD
   * 5. DataSemanticExtraction - extract semantics for each token such as: color, product type, brand, material, ...
   */
 class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpellChecker, dataStemmer: DataStemmer,
-                  dataTokenClassification: DataTokenClassification, dataSemanticExtraction: DataSemanticExtraction) extends Serializable {
+                  dataTokenClassification: DataTokenClassification, dataSemanticExtraction: DataSemanticExtraction,
+                  termSemanticExtraction: TermSemanticExtraction) extends Serializable {
   private val logger = Logger.getLogger(getClass.getName)
 
   val USE_SPELL_CORRECTION = true
@@ -24,8 +25,9 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     val readyData = {
       val tokenizedData = dataLexer.tokenize(data)
       // Spell checker is checking bigrams so need to process as whole list
-      if (spellCorrection) dataSpellChecker.process(tokenizedData)
-      else tokenizedData
+//      if (spellCorrection) dataSpellChecker.process(tokenizedData)
+//      else tokenizedData
+      tokenizedData
     }
 
     readyData map
@@ -37,9 +39,8 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
   def processTestData(data: List[TestItem]): List[CleanTestItem] = {
     logger.info(s"Cleaning test data...")
     val cleaned = data map { item =>
-      val cleanTitle = process(item.title)
-      if ((cleanTitle count { _.stemmedValue.length == 0 }) > 0 ) println(s"${item.title}")
-      val cleanSearchTerm = process(item.searchTerm.value, USE_SPELL_CORRECTION)
+      val cleanTitle = termSemanticExtraction.process(process(item.title))
+      val cleanSearchTerm = termSemanticExtraction.process(process(item.searchTerm.value, USE_SPELL_CORRECTION))
       CleanTestItem(item, cleanTitle, cleanSearchTerm)
     }
     logger.info(s"Cleaning test data finished.")
@@ -49,9 +50,8 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
   def processTrainData(data: List[TrainItem]): List[CleanTrainItem] = {
     logger.info(s"Cleaning training data...")
     val cleaned = data map { item =>
-      val cleanTitle = process(item.rawData.title)
-      if ((cleanTitle count { _.stemmedValue.length == 0 }) > 0 ) println(s"${item.rawData.title}")
-      val cleanSearchTerm = process(item.rawData.searchTerm.value, USE_SPELL_CORRECTION)
+      val cleanTitle = termSemanticExtraction.process(process(item.rawData.title))
+      val cleanSearchTerm = termSemanticExtraction.process(process(item.rawData.searchTerm.value, USE_SPELL_CORRECTION))
       CleanTrainItem(item, cleanTitle, cleanSearchTerm)
     }
     logger.info("Cleaning training data finished.")
@@ -60,16 +60,16 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
 
   def processTestDataSpark(data: RDD[TestItem]): RDD[CleanTestItem] = {
     data map { item =>
-      val cleanTitle = process(item.title)
-      val cleanSearchTerm = process(item.searchTerm.value, USE_SPELL_CORRECTION)
+      val cleanTitle = termSemanticExtraction.process(process(item.title))
+      val cleanSearchTerm = termSemanticExtraction.process(process(item.searchTerm.value, USE_SPELL_CORRECTION))
       CleanTestItem(item, cleanTitle, cleanSearchTerm)
     }
   }
 
   def processTrainDataSpark(data: RDD[TrainItem]): RDD[CleanTrainItem] = {
     data map { item =>
-      val cleanTitle = process(item.rawData.title)
-      val cleanSearchTerm = process(item.rawData.searchTerm.value, USE_SPELL_CORRECTION)
+      val cleanTitle = termSemanticExtraction.process(process(item.rawData.title))
+      val cleanSearchTerm = termSemanticExtraction.process(process(item.rawData.searchTerm.value, USE_SPELL_CORRECTION))
       CleanTrainItem(item, cleanTitle, cleanSearchTerm)
     }
   }

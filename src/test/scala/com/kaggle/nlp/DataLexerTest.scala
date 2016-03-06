@@ -7,4 +7,6 @@ object DataLexerTest extends App {
   val lexer = new DataLexer
 
   println(lexer.tokenize("123 nikola stojiljko,v)ic 123lkj12NIKS322NIKOLA123AdD54kj12)3l12j3lasdddd-ddddd123klj"))
+
+  println(lexer.tokenize("22 in florcant"))
 }

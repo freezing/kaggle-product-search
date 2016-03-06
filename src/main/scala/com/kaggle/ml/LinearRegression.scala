@@ -125,7 +125,10 @@ class LinearRegression(featureSize: Int, numberOfSteps: Int, alpha: Double, lamb
     logger.info("Normalizing finished")
   }
 
-  private def scale(feature: LinearRegressionFeature): LinearRegressionFeature = LinearRegressionFeature(feature.coordinates zip means zip stdDevs map { case ((x, mean), stdDev) => (x - mean) / stdDev })
+  private def scale(feature: LinearRegressionFeature): LinearRegressionFeature = LinearRegressionFeature(feature.coordinates zip means zip stdDevs map { case ((x, mean), stdDev) =>
+    if (stdDev < 0.000001) stdDev
+    else (x - mean) / stdDev
+  })
 
   private def scale(data: List[LabeledFeature]): List[LabeledFeature] =
     data map { case LabeledFeature(feature, label) => LabeledFeature(scale(feature), label) }

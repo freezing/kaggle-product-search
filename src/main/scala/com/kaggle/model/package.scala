@@ -1,6 +1,6 @@
 package com.kaggle
 
-import com.kaggle.nlp.CleanToken
+import com.kaggle.nlp.{TokenType, SemanticType, CleanToken}
 import com.kaggle.nlp.attribute.CleanAttributeName
 
 /**
@@ -32,10 +32,12 @@ package object model {
   }
 
   case class TestItem(id: Id, productId: ProductId, title: RawTitle, searchTerm: RawSearchTerm) extends RawData
-  case class CleanTestItem(original: TestItem, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken])
+  case class CleanTestItem(original: TestItem, cleanTitle: CleanTerm, cleanSearchTerm: CleanTerm)
+
+  case class CleanTerm(tokens: List[CleanToken], attributes: Map[SemanticType, List[CleanToken]])
 
   case class TrainItem(rawData: RawData, relevance: Relevance)
-  case class CleanTrainItem(original: TrainItem, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken])
+  case class CleanTrainItem(original: TrainItem, cleanTitle: CleanTerm, cleanSearchTerm: CleanTerm)
 
   case class Evaluation(id: Id, relevance: Relevance)
 }

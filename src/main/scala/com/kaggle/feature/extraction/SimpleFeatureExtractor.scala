@@ -5,7 +5,7 @@ import java.util.logging.Logger
 import com.kaggle.feature.{TestFeature, TrainFeature}
 import com.kaggle.ml.{LinearRegressionFeature, Feature}
 import com.kaggle.ml.decisiontree.{DecisionTreeFeatures, DecisionTreeFeature}
-import com.kaggle.model.{ProductId, CleanTestItem, CleanTrainItem, RawData}
+import com.kaggle.model._
 import com.kaggle.nlp.CleanToken
 import com.kaggle.service.{DescriptionService, AttributeService}
 import org.apache.spark.rdd.RDD
@@ -17,25 +17,30 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private val logger = Logger.getLogger(getClass.getName)
   import com.kaggle.nlp.attribute._
 
-  def extract(item: RawData, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Feature = {
-    val allWords = getAllWords(item.productId, cleanTitle, cleanSearchTerm)
+  def extract(item: RawData, cleanTitle: CleanTerm, cleanSearchTerm: CleanTerm): Feature = {
+    val allWords = getAllWords(item.productId, cleanTitle.tokens, cleanSearchTerm.tokens)
 
-    val cleanTitleSet = (cleanTitle map { _.stemmedValue }).toSet
+    val cleanTitleSet = (cleanTitle.tokens map { _.stemmedValue }).toSet
 
-    val titleMatchCount = calcMatchCount(cleanTitleSet, cleanSearchTerm)
+    val titleMatchCount = calcMatchCount(cleanTitleSet, cleanSearchTerm.tokens)
 
-    val jaccard = titleMatchCount.toDouble / (cleanTitleSet.size + cleanSearchTerm.size)
-    val queryMatch = titleMatchCount.toDouble / cleanSearchTerm.size
-    val searchInTitleContained = containCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
-    val titleInSearchContained = containCounts(cleanTitle, cleanSearchTerm).toDouble / cleanSearchTerm.length
-    val abbreviationMatches = abbreviationCounts(cleanSearchTerm, cleanTitle).toDouble / cleanSearchTerm.length
-    val searchTermCountAgainstAllWords = calcMatchCount(allWords map { _.stemmedValue }, cleanSearchTerm) / cleanSearchTerm.length
+    val jaccard = tryDivide(titleMatchCount.toDouble, cleanTitleSet.size + cleanSearchTerm.tokens.size)
+    val queryMatch = tryDivide(titleMatchCount.toDouble, cleanSearchTerm.tokens.size)
+    val searchInTitleContained = tryDivide(containCounts(cleanSearchTerm.tokens, cleanTitle.tokens).toDouble, cleanSearchTerm.tokens.length)
+    val titleInSearchContained = tryDivide(containCounts(cleanTitle.tokens, cleanSearchTerm.tokens).toDouble, cleanSearchTerm.tokens.length)
+    val abbreviationMatches = tryDivide(abbreviationCounts(cleanSearchTerm.tokens, cleanTitle.tokens).toDouble, cleanSearchTerm.tokens.length)
+    val searchTermCountAgainstAllWords = tryDivide(calcMatchCount(allWords map { _.stemmedValue }, cleanSearchTerm.tokens), cleanSearchTerm.tokens.length)
 
-    val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm)
-    val productTypeMatches = extractProductTypeFeature(item.productId, cleanSearchTerm)
+    val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm.tokens)
+    val productTypeMatches = extractProductTypeFeature(item.productId, cleanSearchTerm.tokens)
     val queryMatchDecisionTree = if (queryMatch > 0.1) 1.0 else 0.0
+    val cleanSearchTermTier = cleanSearchTerm.tokens.length match {
+      case 0 => 0.0
+      case 1 | 2 => 1.0
+      case _ => 2.0
+    }
 
-    // TODO: THIS MUST BE REFACTORED ASAP
+    // TODO: THIS MUST BE REFACTORED
     Feature(
       LinearRegressionFeature(
       List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords) // Linear Regression features
@@ -43,10 +48,14 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
       DecisionTreeFeatures(List(
         DecisionTreeFeature(brandFeature),
         DecisionTreeFeature(productTypeMatches),
-        DecisionTreeFeature(queryMatchDecisionTree)
+        // TODO: Add clean search term tier
+        //DecisionTreeFeature(queryMatchDecisionTree),
+        DecisionTreeFeature(cleanSearchTermTier)
       ))  // Decision Tree features
     )
   }
+
+  private def tryDivide(a: Double, b: Double): Double = if (Math.abs(b) < 1e-4) 0.0 else a / b
 
   private def getAllWords(productId: ProductId, cleanTitle: List[CleanToken], cleanSearchTerm: List[CleanToken]): Set[CleanToken] = {
     // TODO: ADd attribute name
@@ -80,7 +89,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def containCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
     a map { case CleanToken (_, s, _, _) =>
       (b map { case CleanToken(_, w, _, _) =>
-          if (w.contains(s)) 1 else 0
+          if (s.length > 3 && w.contains(s)) 1 else 0
       }).sum
     } count { _ > 0 }
   }

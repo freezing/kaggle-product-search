@@ -5,7 +5,13 @@ package com.kaggle.nlp
   */
 class DataTokenClassification extends Serializable {
   // TODO: Not implemented
-  def process(token: StemmedToken): ClassifiedToken = ClassifiedToken(token.original, token.stemmed, NOUN)
+  def process(token: StemmedToken): ClassifiedToken = {
+    val tokenType = {
+      if (NlpUtils.isNumber(token.stemmed)) NUMBER
+      else NOUN
+    }
+    ClassifiedToken(token.original, token.stemmed, tokenType)
+  }
 
   def process(tokens: List[StemmedToken]): List[ClassifiedToken] = tokens map process
 }
