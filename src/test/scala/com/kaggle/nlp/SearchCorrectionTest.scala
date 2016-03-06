@@ -9,6 +9,10 @@ object SearchCorrectionTest extends App {
   val correction = new SearchCorrection
   val empty = Map.empty[SemanticType, List[CleanToken]]
 
+  println(correction.correct(CleanTerm(List(CleanToken("", "screw", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty),
+    CleanTerm(List(CleanToken("", "screwdriv", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty)
+  ))
+
   println(correction.correct(CleanTerm(List(CleanToken("", "parts", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty),
     CleanTerm(List(CleanToken("", "spiral", NOUN, UNKNOWN_SEMANTIC_TYPE)), empty)
   ))
