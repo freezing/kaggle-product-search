@@ -15,7 +15,7 @@ import org.apache.spark.rdd.RDD
   */
 class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpellChecker, dataStemmer: DataStemmer,
                   dataTokenClassification: DataTokenClassification, dataSemanticExtraction: DataSemanticExtraction,
-                  termSemanticExtraction: TermSemanticExtraction) extends Serializable {
+                  termSemanticExtraction: TermSemanticExtraction, searchCorrection: SearchCorrection) extends Serializable {
   private val logger = Logger.getLogger(getClass.getName)
 
   val USE_SPELL_CORRECTION = true
@@ -41,7 +41,8 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     val cleaned = data map { item =>
       val cleanTitle = termSemanticExtraction.process(process(item.title))
       val cleanSearchTerm = termSemanticExtraction.process(process(item.searchTerm.value, USE_SPELL_CORRECTION))
-      CleanTestItem(item, cleanTitle, cleanSearchTerm)
+      val correctedSearchTerm = searchCorrection.correct(cleanSearchTerm, cleanTitle)
+      CleanTestItem(item, cleanTitle, correctedSearchTerm)
     }
     logger.info(s"Cleaning test data finished.")
     cleaned
@@ -52,7 +53,9 @@ class DataCleaner(implicit val dataLexer: DataLexer, dataSpellChecker: DataSpell
     val cleaned = data map { item =>
       val cleanTitle = termSemanticExtraction.process(process(item.rawData.title))
       val cleanSearchTerm = termSemanticExtraction.process(process(item.rawData.searchTerm.value, USE_SPELL_CORRECTION))
-      CleanTrainItem(item, cleanTitle, cleanSearchTerm)
+      val correctedSearchTerm = searchCorrection.correct(cleanSearchTerm, cleanTitle)
+
+      CleanTrainItem(item, cleanTitle, correctedSearchTerm)
     }
     logger.info("Cleaning training data finished.")
     cleaned

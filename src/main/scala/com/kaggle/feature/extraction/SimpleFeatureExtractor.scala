@@ -97,10 +97,11 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     cnt2 + cnt3
   }
 
+  // TODO: This should be the same function as the one below
   private def similarCounts(a: List[CleanToken], b: List[CleanToken]): Int = {
     a map { case CleanToken (_, s, _, _) =>
       (b map { case CleanToken(_, w, _, _) =>
-        if (NlpUtils.equal(w, s)) 1 else 0
+        if (w == s) 1 else 0
       }).sum
     } count { _ > 0 }
   }
