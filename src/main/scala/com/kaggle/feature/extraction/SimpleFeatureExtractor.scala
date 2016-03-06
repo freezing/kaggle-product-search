@@ -20,23 +20,21 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   def extract(item: RawData, cleanTitle: CleanTerm, cleanSearchTerm: CleanTerm): Feature = {
     val allWords = getAllWords(item.productId, cleanTitle.tokens, cleanSearchTerm.tokens)
 
-    val cleanTitleSet = (cleanTitle.tokens map { _.stemmedValue }).toSet
+    val titleMatchCount = containCounts(cleanTitle.tokens, cleanSearchTerm.tokens)
 
-    val titleMatchCount = calcMatchCount(cleanTitleSet, cleanSearchTerm.tokens)
-
-    val jaccard = tryDivide(titleMatchCount.toDouble, cleanTitleSet.size + cleanSearchTerm.tokens.size)
+    val jaccard = tryDivide(titleMatchCount.toDouble, cleanTitle.tokens.size + cleanSearchTerm.tokens.size)
     val queryMatch = tryDivide(titleMatchCount.toDouble, cleanSearchTerm.tokens.size)
     val searchInTitleContained = tryDivide(containCounts(cleanSearchTerm.tokens, cleanTitle.tokens).toDouble, cleanSearchTerm.tokens.length)
     val titleInSearchContained = tryDivide(containCounts(cleanTitle.tokens, cleanSearchTerm.tokens).toDouble, cleanSearchTerm.tokens.length)
     val abbreviationMatches = tryDivide(abbreviationCounts(cleanSearchTerm.tokens, cleanTitle.tokens).toDouble, cleanSearchTerm.tokens.length)
-    val searchTermCountAgainstAllWords = tryDivide(calcMatchCount(allWords map { _.stemmedValue }, cleanSearchTerm.tokens), cleanSearchTerm.tokens.length)
+    val searchTermCountAgainstAllWords = tryDivide(containExactCounts(allWords map { _.stemmedValue }, cleanSearchTerm.tokens), cleanSearchTerm.tokens.length)
 
     val searchDimensionAttributes = getDimensionAttributes(cleanSearchTerm.attributes)
     val titleDimensionAttributes = getDimensionAttributes(cleanTitle.attributes)
 
     val dimensionsSpecified = if (searchDimensionAttributes.nonEmpty) 1.0 else 0.0
     val dimensionsFeature = tryDivide(containCounts(searchDimensionAttributes, titleDimensionAttributes), searchDimensionAttributes.length)
-    
+
     val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm.tokens)
     val productTypeMatches = extractProductTypeFeature(item.productId, cleanSearchTerm.tokens)
     val queryMatchDecisionTree = if (queryMatch > 0.1) 1.0 else 0.0
@@ -60,6 +58,10 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
         DecisionTreeFeature(dimensionsSpecified)
       ))  // Decision Tree features
     )
+  }
+
+  private def containExactCounts(inSet: Set[String], from: List[CleanToken]): Int = {
+    from count { x => inSet.contains(x.stemmedValue) }
   }
 
   private def equal(w: String, s: String): Boolean = {
@@ -120,7 +122,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def extractBrandFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
     val attr = attributeService.getClean(productId)
     attr.get(BRAND) match {
-      case Some(value) if calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm) > 0 => 1.0
+      case Some(value) if containCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
       case _ => 0.0
         // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
 //        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
@@ -130,15 +132,11 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
   private def extractProductTypeFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
     val attr = attributeService.getClean(productId)
     attr.get(PRODUCT_TYPE) match {
-      case Some(value) if calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm) > 0 => 1.0
+      case Some(value) if containCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
       case _ => 0.0
       // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
       //        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
     }
-  }
-
-  private def calcMatchCount(titleSet: Set[String], searchTerm: List[CleanToken]): Int = {
-    searchTerm count { token => titleSet.contains(token.stemmedValue) }
   }
 
   def processTrainData(data: List[CleanTrainItem]): List[TrainFeature] = {
