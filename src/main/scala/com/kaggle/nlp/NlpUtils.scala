@@ -31,7 +31,11 @@ object NlpUtils {
   def isNumber(s: String): Boolean = s forall Character.isDigit
 
   def equal(w: String, s: String): Boolean = {
-    if (s.length <= 3 || w.length <= 3) w == s
+    val wNormalized = removeDuplicates(w)
+    val sNormalized = removeDuplicates(s)
+
+    if (wNormalized == sNormalized) true
+    else if (s.length <= 3 || w.length <= 3) w == s
     else {
       // Get all letters (union)
       val wCounts = letterCounts(w)
@@ -44,4 +48,17 @@ object NlpUtils {
   }
 
   def letterCounts(s: String): Map[Char, Int] = s groupBy { x => x } map { case (k, v) => k -> v.length } withDefaultValue 0
+
+  def removeDuplicates(s: String): String = {
+    // Mutable
+    var takeCurrent = true
+    s sliding 2 map { w =>
+      val ret = {
+        if (takeCurrent) w.head.toString
+        else ""
+      }
+      takeCurrent = w.head != w.last
+      ret
+    } mkString ""
+  }
 }
