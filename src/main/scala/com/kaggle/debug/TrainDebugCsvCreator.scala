@@ -26,7 +26,7 @@ class TrainDebugCsvCreator(evaluations: List[Evaluation], trainFeatures: List[Tr
     val header = "product_id,title,search,clean title,clean search,decisions,features,relevance,prediction\n"
     val data = evaluations zip trainFeatures zip cleanTrainData sortBy { case (trainFeature, _) =>
       trainFeature._2.feature.linearRegressionFeature.coordinates
-    } map { case ((Evaluation(_, prediction), trainFeature), trainItem) =>
+    } sortBy { _._2.original.relevance.value } map { case ((Evaluation(_, prediction), trainFeature), trainItem) =>
       s"${trainItem.original.rawData.productId.value}," +
         s"${"\"" + trainItem.original.rawData.title + "\""},${"\"" + trainItem.original.rawData.searchTerm.value + "\""}," +
         s"${cleanTerm(trainItem.cleanTitle)}," +
