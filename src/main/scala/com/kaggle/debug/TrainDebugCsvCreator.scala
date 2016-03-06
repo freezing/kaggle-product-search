@@ -19,7 +19,7 @@ class TrainDebugCsvCreator(evaluations: List[Evaluation], trainFeatures: List[Tr
     }
   }
 
-  implicit val listOrder: Ordering[List[Double]] = Ordering.by(a => (a.head, a(1), a(2), a(3), a(4)))
+  implicit val listOrder: Ordering[List[Double]] = Ordering.by(a => (a.head, a(1), a(2), a(3), a(4), a(5), a(6)))
 
 
   private def makeContents: String = {
