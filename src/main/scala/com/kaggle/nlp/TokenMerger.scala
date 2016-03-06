@@ -34,7 +34,12 @@ class TokenMerger {
   }
 
   private def canMerge(current: CleanToken, next: CleanToken, tokens: List[CleanToken]): Boolean = {
-    val merged = current.stemmedValue ++ next.stemmedValue
-    (tokens count { t => NlpUtils.equal(merged, t.stemmedValue) }) > 0
+//    if (Math.min(current.stemmedValue.length, next.stemmedValue.length) / Math.max(current.stemmedValue.length, next.stemmedValue.length) < 0.3) {
+    if (current.stemmedValue.length == 1 || next.stemmedValue.length == 1) {
+      false
+    } else {
+      val merged = current.stemmedValue ++ next.stemmedValue
+      (tokens count { t => NlpUtils.equalPrecise(merged, t.stemmedValue) }) > 0
+    }
   }
 }

@@ -48,6 +48,25 @@ object NlpUtils {
     }
   }
 
+  // TODO: REFACTOR TO USE THE SAME EQUAL METHOD WITH PARAMETERS
+  def equalPrecise(w: String, s: String): Boolean = {
+    val wNormalized = removeDuplicates(w)
+    val sNormalized = removeDuplicates(s)
+
+    if (wNormalized == sNormalized) true
+    else if (s.length <= 3 || w.length <= 3) w == s
+    else {
+      // Get all letters (union)
+      val wCounts = letterCounts(w)
+      val sCounts = letterCounts(s)
+      val keys = wCounts.keys.toSet union sCounts.keys.toSet
+      val differenceCount = (keys.toList map { k => Math.abs(wCounts(k) - sCounts(k)) }).sum
+      val difference = differenceCount.toDouble / Math.max(w.length, s.length)
+      val lcsMatchRatio = JavaNlpUtils.lcsMatch(w, s).toDouble / Math.max(w.length, s.length)
+      (lcsMatchRatio > 0.9 && difference < 0.3) || difference < 0.15
+    }
+  }
+
   def letterCounts(s: String): Map[Char, Int] = s groupBy { x => x } map { case (k, v) => k -> v.length } withDefaultValue 0
 
   def removeDuplicates(s: String): String = {

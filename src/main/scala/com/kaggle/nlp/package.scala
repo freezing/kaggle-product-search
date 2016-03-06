@@ -25,6 +25,7 @@ package object nlp {
   case object POUND extends DIMENSION
   case object VOLT extends DIMENSION
   case object AMP extends DIMENSION
+  case object BTU extends DIMENSION
   case object CU_FT extends DIMENSION
   case object SQ_FT extends DIMENSION
   case object OZ extends DIMENSION

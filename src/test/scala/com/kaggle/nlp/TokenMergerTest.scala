@@ -7,8 +7,8 @@ import com.kaggle.model.CleanTerm
   */
 object TokenMergerTest extends App {
   val empty = Map.empty[SemanticType, List[CleanToken]]
-  val title = DataCleaner.process("Con-Tact Creative screwdrivers Covering 18 in. x 75 ft. Rosebud Multipurpose Shelf Liner, 1 Roll")
-  val search = DataCleaner.process("duck shelf liner screw driver")
+  val title = DataCleaner.process("LG Electronics 12,000 BTU 230/208-Volt WindowUnit Air Conditioner with Cool, Heat and Remote")
+  val search = DataCleaner.process("A/c window unit")
   val titleTerm = CleanTerm(title, empty)
 
   println(title)
@@ -19,7 +19,9 @@ object TokenMergerTest extends App {
 
   val correctedSearch = correction.correct(CleanTerm(search, empty), CleanTerm(title, empty))
   val mergedSearch = merger.process(correctedSearch, titleTerm)
+  val mergedTitle = merger.process(titleTerm, mergedSearch)
 
   println(correctedSearch)
   println(mergedSearch)
+  println(mergedTitle)
 }

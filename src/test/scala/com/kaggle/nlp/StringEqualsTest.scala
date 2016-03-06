@@ -4,6 +4,10 @@ package com.kaggle.nlp
   * Created by freezing on 06/03/16.
   */
 object StringEqualsTest extends App {
+  println(NlpUtils.equalPrecise("wheelbarrow", "wheelbarrowtire"))
+  println(NlpUtils.equalPrecise("wheelbarrow", "wheelbarrowtire"))
+  println(NlpUtils.equalPrecise("wheelbarrow", "wheelbarrowtire"))
+
   println(NlpUtils.equal("paint", "psint"))
   println(NlpUtils.equal("parts", "spiral"))
   println(NlpUtils.equal("wheelbarow", "wheelbarrow"))

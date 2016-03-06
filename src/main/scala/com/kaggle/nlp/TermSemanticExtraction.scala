@@ -12,6 +12,7 @@ class TermSemanticExtraction {
   val semanticTypes = Map(
     "in" -> INCH,
     "amp" -> AMP,
+    "btu" -> BTU,
     "oz" -> OZ,
     "lb" -> POUND,
     "volt" -> VOLT,
@@ -33,7 +34,7 @@ class TermSemanticExtraction {
         case NUMBER => 'n'
         case NOUN => token.stemmedValue match {
           case "x" | "by" => 'x'
-          case "in" | "amp" | "ft" | "lb" | "amp" | "volt" | "gal" | "oz" | "cu" | "cc" | "mm" | "year" => 'd'
+          case "in" | "btu" | "a" | "amp" |  "ft" | "lb" | "amp"  | "volt" | "gal" | "oz" | "cu" | "cc" | "mm" | "year" => 'd'
           case _ => 'w'
         }
       }
