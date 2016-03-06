@@ -7,6 +7,7 @@ import com.kaggle.model.CleanTerm
   */
 object TermSemanticExtractionTest extends App {
   val extractor = new TermSemanticExtraction
+  println(nice(termSemanticExtraction.process(DataCleaner.process("50 amp 250-600v"))))
   println(nice(termSemanticExtraction.process(DataCleaner.process("Rust-Oleum Specialty 30 oz. Magnetic Primer Kit"))))
   println(nice(termSemanticExtraction.process(DataCleaner.process("air filter 1 in"))))
   println(nice(termSemanticExtraction.process(DataCleaner.process("milliken millwork 36 x 80 master nouveau decor glas 1 4 lite 8 panel finish oak fiberglas prehung front door"))))

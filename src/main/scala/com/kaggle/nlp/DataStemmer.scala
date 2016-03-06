@@ -28,7 +28,7 @@ class DataStemmer extends Serializable {
 
   // TODO: Not implemented
   def process(token: Token): StemmedToken = {
-    var s = stemPlural(token.value.toLowerCase)//stems(stemPlural(token.value.toLowerCase))
+    var s = stems(stemPlural(token.value.toLowerCase))
 
     s = s.replace("'","in")
     s = s.replace("inches","in")
