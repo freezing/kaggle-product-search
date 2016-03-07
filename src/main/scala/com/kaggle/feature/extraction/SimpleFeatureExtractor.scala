@@ -36,6 +36,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val dimensionsFeature = tryDivide(similarCounts(searchDimensionAttributes, titleDimensionAttributes), searchDimensionAttributes.length)
 
     val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm.tokens)
+    val materialMatches = extractMaterialFeature(item.productId, cleanSearchTerm.tokens)
     val productTypeMatches = extractProductTypeFeature(item.productId, cleanSearchTerm.tokens)
     val queryMatchDecisionTree = if (queryMatch > 0.1) 1.0 else 0.0
     val cleanSearchTermTier = cleanSearchTerm.tokens.length match {
@@ -59,6 +60,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
         DecisionTreeFeature(searchTitleCountRatio),
         DecisionTreeFeature(brandFeature),
         DecisionTreeFeature(productTypeMatches),
+        DecisionTreeFeature(materialMatches),
         // TODO: Add clean search term tier
         //DecisionTreeFeature(queryMatchDecisionTree),
         DecisionTreeFeature(cleanSearchTermTier),
@@ -128,8 +130,18 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     attr.get(BRAND) match {
       case Some(value) if similarCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
       case _ => 0.0
-        // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
-//        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
+      // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
+      //        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
+    }
+  }
+
+  private def extractMaterialFeature(productId: ProductId, cleanSearchTerm: List[CleanToken]): Double = {
+    val attr = attributeService.getClean(productId)
+    attr.get(MATERIAL) match {
+      case Some(value) if similarCounts(value.cleanValue, cleanSearchTerm) > 0 => 1.0
+      case _ => 0.0
+      // TODO: CleanToken should say if word is BRAND which can be used to compare the brand, and if is wrong to return -1
+      //        calcMatchCount((value.cleanValue map { _.stemmedValue }).toSet, cleanSearchTerm).toDouble / value.cleanValue.length
     }
   }
 
