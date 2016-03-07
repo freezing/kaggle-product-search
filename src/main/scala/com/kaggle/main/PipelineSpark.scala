@@ -5,7 +5,7 @@ import com.kaggle.feature.extraction.SimpleFeatureExtractor
 import com.kaggle.file.SubmitCsvCreator
 import com.kaggle.ml.MachineLearningCommons
 import com.kaggle.nlp.DataCleaner
-import com.kaggle.service.SparkFileReader
+import com.kaggle.service.{TFIDFService, SparkFileReader}
 
 /**
   * Created by freezing on 2/25/16.
@@ -29,9 +29,12 @@ object PipelineSpark extends App with Serializable {
   val cleanTrainData = DataCleaner.processTrainDataSpark(trainData)
   val cleanTestData = DataCleaner.processTestDataSpark(testData)
 
+  // Ugly
+  val tfidfService = new TFIDFService(cleanTrainData.toLocalIterator.toList, cleanTestData.toLocalIterator.toList)
+
   // 3. Extract Features
-  val trainDataFeatures = SimpleFeatureExtractor.processTrainDataSpark(cleanTrainData).cache()
-  val testDataFeatures = SimpleFeatureExtractor.processTestDataSpark(cleanTestData)
+  val trainDataFeatures = SimpleFeatureExtractor.processTrainDataSpark(cleanTrainData, tfidfService).cache()
+  val testDataFeatures = SimpleFeatureExtractor.processTestDataSpark(cleanTestData, tfidfService)
 
   // 4. Machine Learning
   // TODO: Change to spark
