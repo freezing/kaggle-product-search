@@ -28,4 +28,5 @@ package object service {
   implicit val spellCheckerService = new SpellCheckerService
   implicit val languageModelService = new LanguageModelService
   implicit val errorModelService = new ErrorModelService
+  implicit val tfidfService = new TFIDFService
 }

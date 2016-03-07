@@ -1,5 +1,7 @@
 package com.kaggle
 
+import com.kaggle.service.TFIDFService
+
 /**
   * Created by freezing on 28/02/16.
   */

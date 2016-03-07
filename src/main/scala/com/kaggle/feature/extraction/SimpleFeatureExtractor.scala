@@ -13,11 +13,11 @@ import org.apache.spark.rdd.RDD
 /**
   * Created by freezing on 2/25/16.
   */
-class SimpleFeatureExtractor(implicit val attributeService: AttributeService, descriptionService: DescriptionService) extends Serializable {
+class SimpleFeatureExtractor(implicit val attributeService: AttributeService, descriptionService: DescriptionService, tfidfService: TFIDFService) extends Serializable {
   private val logger = Logger.getLogger(getClass.getName)
   import com.kaggle.nlp.attribute._
 
-  def extract(item: RawData, cleanTitle: CleanTerm, cleanSearchTerm: CleanTerm, tfidfService: TFIDFService): Feature = {
+  def extract(item: RawData, cleanTitle: CleanTerm, cleanSearchTerm: CleanTerm): Feature = {
     val allWords = getAllWords(item.productId, cleanTitle.tokens, cleanSearchTerm.tokens)
 
     val titleMatchCount = similarCounts(cleanTitle.tokens, cleanSearchTerm.tokens)
@@ -35,7 +35,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val dimensionsSpecified = if (searchDimensionAttributes.nonEmpty) 1.0 else 0.0
     val dimensionsFeature = tryDivide(similarCounts(searchDimensionAttributes, titleDimensionAttributes), searchDimensionAttributes.length)
 
-    val tfidfFeature = extractTfidfFeature(cleanSearchTerm, item.productId, tfidfService)
+    val tfidfFeature = extractTfidfFeature(cleanSearchTerm, item.productId)
     assert(tfidfFeature.length == 4)
     val tfidfTier = 0.0 // TODO: Add TFIDF Tier in decision tree
 
@@ -73,7 +73,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     )
   }
 
-  private def extractTfidfFeature(search: CleanTerm, id: ProductId, tfidfService: TFIDFService): List[Double] = {
+  private def extractTfidfFeature(search: CleanTerm, id: ProductId): List[Double] = {
     val weights = search.tokens map { t => tfidfService.tfidf(t.stemmedValue, id) }
     val extendedWeights = {
       if (weights.length < 3) {
@@ -172,36 +172,36 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     }
   }
 
-  def processTrainData(data: List[CleanTrainItem], tFIDFService: TFIDFService): List[TrainFeature] = {
+  def processTrainData(data: List[CleanTrainItem]): List[TrainFeature] = {
     logger.info(s"Feature extraction for train data...")
     val features = data map { item =>
-      val feature = extract(item.original.rawData, item.cleanTitle, item.cleanSearchTerm, tFIDFService)
+      val feature = extract(item.original.rawData, item.cleanTitle, item.cleanSearchTerm)
       TrainFeature(feature, item.original.relevance, item.original.rawData.id)
     }
     logger.info("Feature extraction for train data finished.")
     features
   }
 
-  def processTestData(data: List[CleanTestItem], tFIDFService: TFIDFService): List[TestFeature] = {
+  def processTestData(data: List[CleanTestItem]): List[TestFeature] = {
     logger.info(s"Feature extraction for test data...")
     val features = data map { item =>
-      val feature = extract(item.original, item.cleanTitle, item.cleanSearchTerm, tFIDFService)
+      val feature = extract(item.original, item.cleanTitle, item.cleanSearchTerm)
       TestFeature(feature, item.original.id)
     }
     logger.info(s"Feature extraction for test data finished.")
     features
   }
 
-  def processTrainDataSpark(data: RDD[CleanTrainItem], tFIDFService: TFIDFService): RDD[TrainFeature] = {
+  def processTrainDataSpark(data: RDD[CleanTrainItem]): RDD[TrainFeature] = {
     data map { item =>
-      val feature = extract(item.original.rawData, item.cleanTitle, item.cleanSearchTerm, tFIDFService)
+      val feature = extract(item.original.rawData, item.cleanTitle, item.cleanSearchTerm)
       TrainFeature(feature, item.original.relevance, item.original.rawData.id)
     }
   }
 
-  def processTestDataSpark(data: RDD[CleanTestItem], tFIDFService: TFIDFService): RDD[TestFeature] = {
+  def processTestDataSpark(data: RDD[CleanTestItem]): RDD[TestFeature] = {
     data map { item =>
-      val feature = extract(item.original, item.cleanTitle, item.cleanSearchTerm, tFIDFService)
+      val feature = extract(item.original, item.cleanTitle, item.cleanSearchTerm)
       TestFeature(feature, item.original.id)
     }
   }

@@ -29,12 +29,9 @@ object PipelineSpark extends App with Serializable {
   val cleanTrainData = DataCleaner.processTrainDataSpark(trainData)
   val cleanTestData = DataCleaner.processTestDataSpark(testData)
 
-  // Ugly
-  val tfidfService = new TFIDFService(cleanTrainData.toLocalIterator.toList, cleanTestData.toLocalIterator.toList)
-
   // 3. Extract Features
-  val trainDataFeatures = SimpleFeatureExtractor.processTrainDataSpark(cleanTrainData, tfidfService).cache()
-  val testDataFeatures = SimpleFeatureExtractor.processTestDataSpark(cleanTestData, tfidfService)
+  val trainDataFeatures = SimpleFeatureExtractor.processTrainDataSpark(cleanTrainData).cache()
+  val testDataFeatures = SimpleFeatureExtractor.processTestDataSpark(cleanTestData)
 
   // 4. Machine Learning
   // TODO: Change to spark

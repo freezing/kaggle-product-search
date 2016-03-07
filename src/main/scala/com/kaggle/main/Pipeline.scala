@@ -47,12 +47,9 @@ object Pipeline extends App with Serializable {
   val cleanTrainData = DataCleaner.processTrainData(trainData)
   val cleanTestData = DataCleaner.processTestData(testData)
 
-  // This is becoming uglier :(
-  val tfidfService = new TFIDFService(cleanTrainData, cleanTestData)
-
   // 3. Extract Features
-  val trainDataFeatures = SimpleFeatureExtractor.processTrainData(cleanTrainData, tfidfService)
-  val testDataFeatures = SimpleFeatureExtractor.processTestData(cleanTestData, tfidfService)
+  val trainDataFeatures = SimpleFeatureExtractor.processTrainData(cleanTrainData)
+  val testDataFeatures = SimpleFeatureExtractor.processTestData(cleanTestData)
 
   // 4. Machine Learning
   // TODO: Refactor so that featureSize is figured out in LinearRegression
