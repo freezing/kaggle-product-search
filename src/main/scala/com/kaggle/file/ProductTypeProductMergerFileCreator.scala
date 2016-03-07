@@ -18,6 +18,6 @@ class ProductTypeProductMergerFileCreator(v: List[(String, TrainItem)]) {
     }
   }
 
-  private def makeContents(k: String, v: TrainItem): String = s"${v.rawData.productId},$k," +
+  private def makeContents(k: String, v: TrainItem): String = s"${v.rawData.productId},${"\"" + k + "\""}," +
     s"${"\"" + v.rawData.title + "\""},${"\"" + v.rawData.searchTerm.value + "\""},${v.relevance.value}" + "\n"
 }
