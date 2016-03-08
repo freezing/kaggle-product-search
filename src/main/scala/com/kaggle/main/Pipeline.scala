@@ -21,8 +21,8 @@ import com.kaggle.service.{TFIDFService, CsvReader}
   * 5. Save results
   */
 object Pipeline extends App with Serializable {
-  val numberOfSteps = 500
-  val alpha = 0.3
+  val numberOfSteps = 1000
+  val alpha = 0.1
   val lambda = 0.1
   val normalize = true
   val threshold = 0.1

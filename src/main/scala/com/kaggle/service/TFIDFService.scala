@@ -13,7 +13,7 @@ class TFIDFService(implicit val attributeService: AttributeService, descriptionS
       val id = ProductId(cols.head.substring("ProductId(".length, cols.head.length - 1))
       val tfidf = cols(2).toDouble
       (id, cols(1)) -> tfidf
-    }).toMap
+    }).toMap withDefaultValue 0.0
   }
 
   def tfidf(word: String, productId: ProductId): Double = tfidfs((productId, word))
