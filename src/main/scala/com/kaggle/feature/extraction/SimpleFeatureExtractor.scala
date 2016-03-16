@@ -37,7 +37,10 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
 
     val tfidfFeature = extractTfidfFeature(cleanSearchTerm, item.productId)
     assert(tfidfFeature.length == 4)
-    val tfidfTier = 0.0 // TODO: Add TFIDF Tier in decision tree
+    val tfidfTier = {
+      if (tfidfFeature.head < 0.5) 0.0
+      else 1.0
+    }
 
     val brandFeature = extractBrandFeature(item.productId, cleanSearchTerm.tokens)
     val materialMatches = extractMaterialFeature(item.productId, cleanSearchTerm.tokens)
@@ -45,7 +48,7 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
     val queryMatchDecisionTree = if (queryMatch > 0.1) 1.0 else 0.0
     val cleanSearchTermTier = cleanSearchTerm.tokens.length match {
       case 0 => 0.0
-      case 1 | 2 => 1.0
+//      case 1 | 2 => 1.0
       case _ => 2.0
     }
     val searchTitleCountRatio = {
@@ -61,8 +64,9 @@ class SimpleFeatureExtractor(implicit val attributeService: AttributeService, de
       tfidfFeature ++ List(jaccard, queryMatch, searchInTitleContained, titleInSearchContained, abbreviationMatches, searchTermCountAgainstAllWords, dimensionsFeature) // Linear Regression features
       ),
       DecisionTreeFeatures(List(
-        DecisionTreeFeature(searchTitleCountRatio), // TODO: Maybe have it back
+        //DecisionTreeFeature(searchTitleCountRatio), // TODO: Maybe have it back
         DecisionTreeFeature(brandFeature),
+//        DecisionTreeFeature(tfidfTier),
         DecisionTreeFeature(productTypeMatches),
         DecisionTreeFeature(materialMatches),
         // TODO: Add clean search term tier
